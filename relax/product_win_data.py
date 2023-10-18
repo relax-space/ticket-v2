@@ -11,10 +11,25 @@ def json_template_input(current_data: dict):
     stamp = product_input["stamp"]
     stamp["enable"] = _dict_chk_var["_stamp_var"].get()
     stamp["path"] = _widgets["ety_stamp"].get()
-    ety_X_stamp_scale = _widgets["ety_X_stamp_scale"].get()
-    ety_Y_stamp_scale = _widgets["ety_Y_stamp_scale"].get()
-    stamp["x_scale"] = float(ety_X_stamp_scale) if ety_X_stamp_scale else 0.0
-    stamp["y_scale"] = float(ety_Y_stamp_scale) if ety_Y_stamp_scale else 0.0
+    ety_X_stamp_scale_cover = _widgets["ety_X_stamp_scale_cover"].get()
+    ety_Y_stamp_scale_cover = _widgets["ety_Y_stamp_scale_cover"].get()
+    stamp_cover = stamp["cover"]
+    stamp_cover["x_scale"] = (
+        float(ety_X_stamp_scale_cover) if ety_X_stamp_scale_cover else 0.0
+    )
+    stamp_cover["y_scale"] = (
+        float(ety_Y_stamp_scale_cover) if ety_Y_stamp_scale_cover else 0.0
+    )
+
+    ety_X_stamp_scale_product = _widgets["ety_X_stamp_scale_product"].get()
+    ety_Y_stamp_scale_product = _widgets["ety_Y_stamp_scale_product"].get()
+    stamp_product = stamp["product"]
+    stamp_product["x_scale"] = (
+        float(ety_X_stamp_scale_product) if ety_X_stamp_scale_product else 0.0
+    )
+    stamp_product["y_scale"] = (
+        float(ety_Y_stamp_scale_product) if ety_Y_stamp_scale_product else 0.0
+    )
 
     pass
 
@@ -116,8 +131,11 @@ def render_input(current_data: dict):
     ety_product_input: Entry = _widgets["ety_product_input"]
     ety_import: Entry = _widgets["ety_import"]
     ety_stamp: Entry = _widgets["ety_stamp"]
-    ety_X_stamp_scale: Entry = _widgets["ety_X_stamp_scale"]
-    ety_Y_stamp_scale: Entry = _widgets["ety_Y_stamp_scale"]
+    ety_X_stamp_scale_cover: Entry = _widgets["ety_X_stamp_scale_cover"]
+    ety_Y_stamp_scale_cover: Entry = _widgets["ety_Y_stamp_scale_cover"]
+
+    ety_X_stamp_scale_product: Entry = _widgets["ety_X_stamp_scale_product"]
+    ety_Y_stamp_scale_product: Entry = _widgets["ety_Y_stamp_scale_product"]
 
     product_input = current_data["product"]["input"]
     ety_product_input.delete(0, END)
@@ -131,10 +149,18 @@ def render_input(current_data: dict):
     _dict_chk_var["_stamp_var"].set(stamp["enable"])
     ety_stamp.delete(0, END)
     ety_stamp.insert(END, stamp["path"])
-    ety_X_stamp_scale.delete(0, END)
-    ety_X_stamp_scale.insert(END, stamp["x_scale"])
-    ety_Y_stamp_scale.delete(0, END)
-    ety_Y_stamp_scale.insert(END, stamp["y_scale"])
+
+    stamp_cover = stamp["cover"]
+    ety_X_stamp_scale_cover.delete(0, END)
+    ety_X_stamp_scale_cover.insert(END, stamp_cover["x_scale"])
+    ety_Y_stamp_scale_cover.delete(0, END)
+    ety_Y_stamp_scale_cover.insert(END, stamp_cover["y_scale"])
+
+    stamp_product = stamp["product"]
+    ety_X_stamp_scale_product.delete(0, END)
+    ety_X_stamp_scale_product.insert(END, stamp_product["x_scale"])
+    ety_Y_stamp_scale_product.delete(0, END)
+    ety_Y_stamp_scale_product.insert(END, stamp_product["y_scale"])
 
     pass
 

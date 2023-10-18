@@ -8,8 +8,8 @@
             "enable": true,
             "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
             "path": "D:/file/开票/base/size.xlsx",
-            "page_height_A4": 850,
-            "page_height_A5": 425
+            "page_height_A4": 830,
+            "page_height_A5": 380
         },
         "product": {
             "input": {
@@ -25,15 +25,17 @@
                 "stamp": {
                     "enable": true,
                     "path": "D:/file/开票/base/shian.png",
-                    "column_cover": "C",
-                    "column_product": "D",
-                    "x_scale": 0.24,
-                    "y_scale": 0.254,
                     "cover": {
-                        "x_offset": 20,
+                        "column": "B",
+                        "x_scale": 0.24,
+                        "y_scale": 0.237,
+                        "x_offset": 0,
                         "y_offset": 2
                     },
                     "product": {
+                        "column": "D",
+                        "x_scale": 0.24,
+                        "y_scale": 0.254,
                         "x_offset": 35,
                         "y_offset": 2
                     }
@@ -41,6 +43,296 @@
             },
             "output": {
                 "cover": {
+                    "page_margin": {
+                        "left": 1.78,
+                        "right": 1.78,
+                        "top": 1,
+                        "bottom": 1
+                    },
+                    "column_width": {
+                        "A": 23.0,
+                        "B": 21.0,
+                        "C": 23.0
+                    },
+                    "row1": {
+                        "height": 48,
+                        "contents": [
+                            "@@@@年####月驻琼部队副食品区域集中筹措物资【封面】"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 14,
+                                "bold": true,
+                                "align": "centre",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    },
+                    "row2": {
+                        "height": 20,
+                        "contents": [
+                            "供应商：||||                       每日汇总表"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "宋体",
+                                "font_size": 8,
+                                "align": "left",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    },
+                    "row3": {
+                        "height": 20,
+                        "contents": [
+                            "灶点号,收货日期,金额"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 11,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_data": {
+                        "height": 20,
+                        "contents": [],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 11,
+                                "bold": true,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            },
+                            {
+                                "font_name": "Arial",
+                                "font_size": 11,
+                                "bold": false,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_last": {
+                        "height": 20,
+                        "contents": [
+                            "（盖章）"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "宋体",
+                                "font_size": 10,
+                                "align": "centre",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    }
+                },
+                "product_detail": {
+                    "product_name_settings": {
+                        "max_china_count_per_row": 17,
+                        "height1": 15,
+                        "height2": 7,
+                        "height3": 11
+                    },
+                    "page_margin": {
+                        "left": 1.78,
+                        "right": 1.78,
+                        "top": 1,
+                        "bottom": 1
+                    },
+                    "column_width": {
+                        "A": 3.16,
+                        "B": 6.87,
+                        "C": 15.44,
+                        "D": 26.87,
+                        "E": 9.73,
+                        "F": 6.44,
+                        "G": 5.01,
+                        "H": 9.73
+                    },
+                    "row1": {
+                        "height": 48,
+                        "contents": [
+                            "@@@@年####月驻琼部队副食品区域集中筹措物资明细表"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 14,
+                                "bold": true,
+                                "align": "centre",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    },
+                    "row2": {
+                        "height": 15,
+                        "contents": [
+                            "报账单编号："
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 10,
+                                "align": "centre",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    },
+                    "row3": {
+                        "height": 15,
+                        "contents": [
+                            "供应商：||||",
+                            "灶点：",
+                            "时间：@@@@年####月$$$$日"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 8,
+                                "align": "left",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    },
+                    "row4": {
+                        "height": 15,
+                        "contents": [
+                            "序号,收货日期,订单编号,商品名称,计量单位,单价,数量,金额"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 8,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_data": {
+                        "height": 15,
+                        "contents": [],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 8,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "text_wrap": true,
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_sum_1": {
+                        "height": 15,
+                        "contents": [
+                            "小计"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 8,
+                                "bold": true,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_sum_2": {
+                        "height": 15,
+                        "contents": [
+                            "本账单合计"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "Arial",
+                                "font_size": 8,
+                                "bold": true,
+                                "align": "centre",
+                                "valign": "vcentre",
+                                "border": 1
+                            }
+                        ]
+                    },
+                    "row_last": {
+                        "height": 15,
+                        "contents": [
+                            "（盖章）"
+                        ],
+                        "formats": [
+                            {
+                                "font_name": "宋体",
+                                "font_size": 10,
+                                "align": "centre",
+                                "valign": "vcentre"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ticket": {}
+    },
+    {
+        "checked": false,
+        "menu_name": "农惠民",
+        "supplier_name": "海南农惠民农业供应链科技有限公司",
+        "output_path": "data",
+        "batch_size": {
+            "enable": true,
+            "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
+            "path": "",
+            "page_height_A4": 830,
+            "page_height_A5": 380
+        },
+        "product": {
+            "input": {
+                "product_path": "",
+                "column_name_1": "期望到货时间,供应商名称,报账日期",
+                "column_name": "订单基本信息:订单编号,订单基本信息:期望到货时间,订单基本信息:灶点编码,订单基本信息:供应商名称,商品信息:商品名称,商品信息:单价（元）,商品信息:计量单位,收验货单信息:收验货单总金额（元）,收验货单信息:数量,收验货单信息:小计（元）,支付信息:报账单编号,支付信息:报账日期,支付信息:报账金额（元）",
+                "column_sep_1": ",",
+                "column_sep_2": ":",
+                "batch_import": {
+                    "enable": true,
+                    "path": ""
+                },
+                "stamp": {
+                    "enable": true,
+                    "path": "",
+                    "cover": {
+                        "column": "B",
+                        "x_scale": 0.24,
+                        "y_scale": 0.254,
+                        "x_offset": 20,
+                        "y_offset": 2
+                    },
+                    "product": {
+                        "column": "D",
+                        "x_scale": 0.24,
+                        "y_scale": 0.254,
+                        "x_offset": 35,
+                        "y_offset": 2
+                    }
+                }
+            },
+            "output": {
+                "cover": {
+                    "page_margin": {
+                        "left": 1.78,
+                        "right": 1.78,
+                        "top": 1,
+                        "bottom": 1
+                    },
                     "column_width": {
                         "A": 23.0,
                         "B": 21.0,
@@ -258,282 +550,6 @@
                     },
                     "row_last": {
                         "height": 15,
-                        "contents": [
-                            "（盖章）"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "宋体",
-                                "font_size": 10,
-                                "align": "centre",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "ticket": {}
-    },
-    {
-        "checked": false,
-        "menu_name": "农惠民",
-        "supplier_name": "海南农惠民农业供应链科技有限公司",
-        "output_path": "data",
-        "batch_size": {
-            "enable": true,
-            "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
-            "path": "",
-            "page_height_A4": 850,
-            "page_height_A5": 425
-        },
-        "product": {
-            "input": {
-                "product_path": "",
-                "column_name_1": "期望到货时间,供应商名称,报账日期",
-                "column_name": "订单基本信息:订单编号,订单基本信息:期望到货时间,订单基本信息:灶点编码,订单基本信息:供应商名称,商品信息:商品名称,商品信息:单价（元）,商品信息:计量单位,收验货单信息:收验货单总金额（元）,收验货单信息:数量,收验货单信息:小计（元）,支付信息:报账单编号,支付信息:报账日期,支付信息:报账金额（元）",
-                "column_sep_1": ",",
-                "column_sep_2": ":",
-                "batch_import": {
-                    "enable": true,
-                    "path": ""
-                },
-                "stamp": {
-                    "enable": true,
-                    "path": "",
-                    "column_cover": "C",
-                    "column_product": "D",
-                    "x_scale": 0.24,
-                    "y_scale": 0.254,
-                    "cover": {
-                        "x_offset": 20,
-                        "y_offset": 2
-                    },
-                    "product": {
-                        "x_offset": 35,
-                        "y_offset": 2
-                    }
-                }
-            },
-            "output": {
-                "cover": {
-                    "column_width": {
-                        "A": "23",
-                        "B": "21",
-                        "C": "23"
-                    },
-                    "row1": {
-                        "height": "48",
-                        "contents": [
-                            "@@@@年####月驻琼部队副食品区域集中筹措物资【封面】"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 14,
-                                "bold": true,
-                                "align": "centre",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    },
-                    "row2": {
-                        "height": "15",
-                        "contents": [
-                            "供应商：||||                       每日汇总表"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "宋体",
-                                "font_size": 8,
-                                "align": "left",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    },
-                    "row3": {
-                        "height": "15",
-                        "contents": [
-                            "灶点号,收货日期,金额"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 11,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_data": {
-                        "height": "15",
-                        "contents": [],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 11,
-                                "bold": true,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            },
-                            {
-                                "font_name": "Arial",
-                                "font_size": 11,
-                                "bold": false,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_last": {
-                        "height": "15",
-                        "contents": [
-                            "（盖章）"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "宋体",
-                                "font_size": 10,
-                                "align": "centre",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    }
-                },
-                "product_detail": {
-                    "product_name_settings": {
-                        "max_china_count_per_row": 17,
-                        "height1": 15,
-                        "height2": 7,
-                        "height3": 11
-                    },
-                    "page_margin": {
-                        "left": 1.78,
-                        "right": 1.78,
-                        "top": 1,
-                        "bottom": 1
-                    },
-                    "column_width": {
-                        "A": 3.16,
-                        "B": 6.87,
-                        "C": 15.44,
-                        "D": 26.87,
-                        "E": 9.73,
-                        "F": 6.44,
-                        "G": 5.01,
-                        "H": 9.73
-                    },
-                    "row1": {
-                        "height": "48",
-                        "contents": [
-                            "@@@@年####月驻琼部队副食品区域集中筹措物资明细表"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 14,
-                                "bold": true,
-                                "align": "centre",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    },
-                    "row2": {
-                        "height": "15",
-                        "contents": [
-                            "报账单编号："
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 10,
-                                "align": "centre",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    },
-                    "row3": {
-                        "height": "15",
-                        "contents": [
-                            "供应商：||||",
-                            "灶点：",
-                            "时间：@@@@年####月$$$$日"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 8,
-                                "align": "left",
-                                "valign": "vcentre"
-                            }
-                        ]
-                    },
-                    "row4": {
-                        "height": "15",
-                        "contents": [
-                            "序号,收货日期,订单编号,商品名称,计量单位,单价,数量,金额"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 8,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_data": {
-                        "height": "15",
-                        "contents": [],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 8,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "text_wrap": true,
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_sum_1": {
-                        "height": "15",
-                        "contents": [
-                            "小计"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 8,
-                                "bold": true,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_sum_2": {
-                        "height": "15",
-                        "contents": [
-                            "本账单合计"
-                        ],
-                        "formats": [
-                            {
-                                "font_name": "Arial",
-                                "font_size": 8,
-                                "bold": true,
-                                "align": "centre",
-                                "valign": "vcentre",
-                                "border": 1
-                            }
-                        ]
-                    },
-                    "row_last": {
-                        "height": "15",
                         "contents": [
                             "（盖章）"
                         ],

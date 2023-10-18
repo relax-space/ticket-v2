@@ -1,6 +1,7 @@
 from os import path as os_path
 from pandas import read_excel
 from math import floor
+from xlsxwriter.worksheet import Worksheet
 
 
 def get_page_size_list(batch_size: dict) -> tuple[dict, dict]:
@@ -106,3 +107,68 @@ def get_row_height_content(
     row_count, new_content = get_row_count(raw, byte_per_row)
     row_height = get_row_height_byrow(row_count, height1, height2, height3)
     return row_height, new_content
+
+
+def set_page_size(ws1: Worksheet, size_dict: dict):
+    page_size = size_dict["page_size"]
+    page_size_index = 9
+    if page_size == "A4":
+        ws1.set_portrait()
+    elif page_size == "A5":
+        ws1.set_landscape()
+        page_size_index = 11
+    ws1.set_paper(page_size_index)
+    return page_size
+
+
+def make_stamp(ws1: Worksheet, row_height_list: list, page_height: int, stamp: dict):
+    column = stamp["column"]
+    img_path = stamp["path"]
+    x_scale = stamp["x_scale"]
+    y_scale = stamp["y_scale"]
+    x_offset = stamp["x_offset"]
+    y_offset = stamp["y_offset"]
+    page_count = 1
+    total_height = 0
+    break_list = []
+    current_height = 0
+    for height in row_height_list:
+        total_height += height
+
+    i = 0
+    row_count = len(row_height_list)
+    while i < row_count:
+        v = row_height_list[i]
+        current_height += v
+        if current_height > page_height * page_count:
+            current_height -= v
+            i -= 1
+            break_list.append(i)
+            page_count += 1
+        i += 1
+
+    # 保证最后一页，至少有两行数据
+    rest_height = total_height - current_height
+    if rest_height == row_height_list[-1]:
+        if break_list:
+            break_list.pop()
+        break_list.append(row_count - 2)
+
+    dic_img = {
+        "x_scale": x_scale,
+        "y_scale": y_scale,
+        "x_offset": x_offset,
+        "y_offset": y_offset,
+    }
+
+    img_row_index = 2
+    if break_list:
+        img_row_index = break_list[-1] + 1
+
+    ws1.insert_image(
+        f"{column}{img_row_index}",
+        img_path,
+        dic_img,
+    )
+    ws1.set_h_pagebreaks(break_list)
+    pass

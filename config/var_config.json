@@ -1,5 +1,7 @@
 {
+    "temp_product": "temp_product",
+    "temp_cover": "temp_cover",
+    "temp_ticket": "temp_ticket",
     "print": "最终打印",
-    "import_list": "批量商品导入",
-    "ticket_pdf": "原始发票"
+    "import_list": "批量商品导入"
 }

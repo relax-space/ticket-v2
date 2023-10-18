@@ -4,6 +4,7 @@
 import time
 from tkinter.font import Font
 from relax.excel_common import get_page_size_list
+from relax.product_cover import write_all_cover
 from relax.product_detail import write_all_product
 from relax.product_input import read_one_product, read_all_product
 from relax.util import fill_zero_2, get_current_data
@@ -61,8 +62,10 @@ def create_click_raw():
     ety_A4_page_height: Entry = _widgets["ety_A4_page_height"]
     ety_A5_page_height: Entry = _widgets["ety_A5_page_height"]
     ety_stamp: Entry = _widgets["ety_stamp"]
-    ety_X_stamp_scale: Entry = _widgets["ety_X_stamp_scale"]
-    ety_Y_stamp_scale: Entry = _widgets["ety_Y_stamp_scale"]
+    ety_X_stamp_scale_cover: Entry = _widgets["ety_X_stamp_scale_cover"]
+    ety_Y_stamp_scale_cover: Entry = _widgets["ety_Y_stamp_scale_cover"]
+    ety_X_stamp_scale_product: Entry = _widgets["ety_X_stamp_scale_product"]
+    ety_Y_stamp_scale_product: Entry = _widgets["ety_Y_stamp_scale_product"]
 
     def create_click_valid():
         if not lst_menu.curselection():
@@ -104,13 +107,21 @@ def create_click_raw():
                 messagebox.showwarning("警告", "印章路径不能为空！")
                 ety_stamp.focus_set()
                 return False
-            if not ety_X_stamp_scale.get():
+            if not ety_X_stamp_scale_cover.get():
                 messagebox.showwarning("警告", "宽度缩放不能为空！")
-                ety_X_stamp_scale.focus_set()
+                ety_X_stamp_scale_cover.focus_set()
                 return False
-            if not ety_Y_stamp_scale.get():
+            if not ety_Y_stamp_scale_cover.get():
                 messagebox.showwarning("警告", "高度缩放不能为空！")
-                ety_Y_stamp_scale.focus_set()
+                ety_Y_stamp_scale_cover.focus_set()
+                return False
+            if not ety_X_stamp_scale_product.get():
+                messagebox.showwarning("警告", "宽度缩放不能为空！")
+                ety_X_stamp_scale_product.focus_set()
+                return False
+            if not ety_Y_stamp_scale_product.get():
+                messagebox.showwarning("警告", "高度缩放不能为空！")
+                ety_Y_stamp_scale_product.focus_set()
                 return False
         return True
 
@@ -165,6 +176,17 @@ def create_click_raw():
         month,
         suppier,
         bill_date,
+        current_data,
+        output_folder_path,
+        product_size_dict,
+    )
+
+    write_all_cover(
+        df_set,
+        df,
+        year,
+        month,
+        suppier,
         current_data,
         output_folder_path,
         product_size_dict,
@@ -282,21 +304,45 @@ def fr_top(fr_product_top, fr_product_top_1):
     _widgets["ety_stamp"] = ety_stamp
     _widgets["btn_stamp"] = btn_stamp
 
-    lbl_stamp_scale = Label(fr_product_top_1, text="缩放比例：")
-    lbl_X_stamp_scale = Label(fr_product_top_1, text="宽度缩放：")
-    ety_X_stamp_scale = Entry(fr_product_top_1, width=6, justify=RIGHT)
-    lbl_Y_stamp_scale = Label(fr_product_top_1, text="高度缩放：")
-    ety_Y_stamp_scale = Entry(fr_product_top_1, width=6, justify=RIGHT)
+    lbl_stamp_scale_cover = Label(fr_product_top_1, text="封面缩放：")
+    lbl_X_stamp_scale_cover = Label(fr_product_top_1, text="宽度缩放：")
+    ety_X_stamp_scale_cover = Entry(fr_product_top_1, width=6, justify=RIGHT)
+    lbl_Y_stamp_scale_cover = Label(fr_product_top_1, text="高度缩放：")
+    ety_Y_stamp_scale_cover = Entry(fr_product_top_1, width=6, justify=RIGHT)
+
+    lbl_stamp_scale_product = Label(fr_product_top_1, text="商品缩放：")
+    lbl_X_stamp_scale_product = Label(fr_product_top_1, text="宽度缩放：")
+    ety_X_stamp_scale_product = Entry(fr_product_top_1, width=6, justify=RIGHT)
+    lbl_Y_stamp_scale_product = Label(fr_product_top_1, text="高度缩放：")
+    ety_Y_stamp_scale_product = Entry(fr_product_top_1, width=6, justify=RIGHT)
 
     row_index = 0
-    lbl_stamp_scale.grid(row=row_index, column=0, padx=(94, 0), pady=(3, 0), sticky=E)
-    lbl_X_stamp_scale.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
-    ety_X_stamp_scale.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
-    lbl_Y_stamp_scale.grid(row=row_index, column=3, padx=(10, 0), pady=(3, 0), sticky=W)
-    ety_Y_stamp_scale.grid(row=row_index, column=4, pady=(3, 0), sticky=W)
+    lbl_stamp_scale_cover.grid(
+        row=row_index, column=0, padx=(94, 0), pady=(3, 0), sticky=E
+    )
+    lbl_X_stamp_scale_cover.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
+    ety_X_stamp_scale_cover.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
+    lbl_Y_stamp_scale_cover.grid(
+        row=row_index, column=3, padx=(10, 0), pady=(3, 0), sticky=W
+    )
+    ety_Y_stamp_scale_cover.grid(row=row_index, column=4, pady=(3, 0), sticky=W)
 
-    _widgets["ety_X_stamp_scale"] = ety_X_stamp_scale
-    _widgets["ety_Y_stamp_scale"] = ety_Y_stamp_scale
+    row_index += 1
+    lbl_stamp_scale_product.grid(
+        row=row_index, column=0, padx=(94, 0), pady=(3, 0), sticky=E
+    )
+    lbl_X_stamp_scale_product.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
+    ety_X_stamp_scale_product.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
+    lbl_Y_stamp_scale_product.grid(
+        row=row_index, column=3, padx=(10, 0), pady=(3, 0), sticky=W
+    )
+    ety_Y_stamp_scale_product.grid(row=row_index, column=4, pady=(3, 0), sticky=W)
+
+    _widgets["ety_X_stamp_scale_cover"] = ety_X_stamp_scale_cover
+    _widgets["ety_Y_stamp_scale_cover"] = ety_Y_stamp_scale_cover
+
+    _widgets["ety_X_stamp_scale_product"] = ety_X_stamp_scale_product
+    _widgets["ety_Y_stamp_scale_product"] = ety_Y_stamp_scale_product
 
     pass
 
@@ -458,7 +504,7 @@ def fr_bottom(fr_product_bottom: Frame):
 
     fr_cover(fr_product_bottom_1)
     fr_product(fr_product_bottom_2)
-    fr_log(fr_product_bottom_3)
+    # fr_log(fr_product_bottom_3)
 
     pass
 

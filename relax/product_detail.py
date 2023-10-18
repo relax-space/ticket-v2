@@ -1,6 +1,6 @@
 import copy
 from pandas import DataFrame, isnull as pd_isnull
-from relax.excel_common import get_row_height_content
+from relax.excel_common import get_row_height_content, make_stamp, set_page_size
 from relax.util import const_re, fill_zero_2, _config_data
 from datetime import datetime
 from xlsxwriter.workbook import Workbook
@@ -73,10 +73,6 @@ def _get_base_data(
     return setting_dict
 
     pass
-
-
-def datetime_to_date(date_str: str) -> str:
-    return f"{date_str[5:7]}月{date_str[8:10]}日"
 
 
 def set_row_format_list(
@@ -185,11 +181,7 @@ def write_content(
     height2 = product_name_settings["height2"]
     height3 = product_name_settings["height3"]
     for i, row in df.iterrows():
-        # 订单已撤销:报账单编号为空
-        if pd_isnull(row["K"]):
-            continue
         receive_date = row["B"]
-
         if receive_date_old and receive_date_old != receive_date:
             # 小计
             seq_no = 1
@@ -245,73 +237,6 @@ def write_content(
     return ws1
 
 
-def set_page_size(ws1: Worksheet, size_dict: dict):
-    page_size = size_dict["page_size"]
-    page_size_index = 9
-    if page_size == "A4":
-        ws1.set_portrait()
-    elif page_size == "A5":
-        ws1.set_landscape()
-        page_size_index = 11
-    ws1.set_paper(page_size_index)
-    return page_size
-    pass
-
-
-def make_stamp(ws1: Worksheet, row_height_list: list, page_height: int, stamp: dict):
-    column = stamp["column_product"]
-    img_path = stamp["path"]
-    x_scale = stamp["x_scale"]
-    y_scale = stamp["y_scale"]
-    stamp_product = stamp["product"]
-    x_offset = stamp_product["x_offset"]
-    y_offset = stamp_product["y_offset"]
-    page_count = 1
-    total_height = 0
-    break_list = []
-    current_height = 0
-    for height in row_height_list:
-        total_height += height
-
-    i = 0
-    row_count = len(row_height_list)
-    while i < row_count:
-        v = row_height_list[i]
-        current_height += v
-        if current_height > page_height * page_count:
-            current_height -= v
-            i -= 1
-            break_list.append(i)
-            page_count += 1
-        i += 1
-
-    # 保证最后一页，至少有两行数据
-    rest_height = total_height - current_height
-    if rest_height == row_height_list[-1]:
-        if break_list:
-            break_list.pop()
-        break_list.append(row_count - 2)
-
-    dic_img = {
-        "x_scale": x_scale,
-        "y_scale": y_scale,
-        "x_offset": x_offset,
-        "y_offset": y_offset,
-    }
-
-    img_row_index = 2
-    if break_list:
-        img_row_index = break_list[-1] + 1
-
-    ws1.insert_image(
-        f"{column}{img_row_index}",
-        img_path,
-        dic_img,
-    )
-    ws1.set_h_pagebreaks(break_list)
-    pass
-
-
 def write_one_product(
     df: DataFrame,
     setting_dict: dict,
@@ -342,6 +267,12 @@ def write_one_product(
         )
     stamp = product_input["stamp"]
     if stamp["enable"]:
+        stamp_product = stamp["product"]
+        stamp["x_offset"] = stamp_product["x_offset"]
+        stamp["y_offset"] = stamp_product["y_offset"]
+        stamp["x_scale"] = stamp_product["x_scale"]
+        stamp["y_scale"] = stamp_product["y_scale"]
+        stamp["column"] = stamp_product["column"]
         make_stamp(ws1, row_height_list, page_height, stamp)
         ws1.set_margins(
             # left=1.78 / 2.5, right=1.78 / 2.5, top=1.91 / 2.5, bottom=0.5 / 2.5
@@ -366,7 +297,7 @@ def write_all_product(
     output_folder_path,
     product_size_dict,
 ):
-    output_folder_path = os_path.join(output_folder_path, _config_data["print"])
+    output_folder_path = os_path.join(output_folder_path, _config_data["temp_product"])
     if not os_path.isdir(output_folder_path):
         makedirs(output_folder_path)
     product_input = copy.deepcopy(current_data["product"]["input"])
@@ -378,7 +309,6 @@ def write_all_product(
     page_margin = product_detail["page_margin"]
     for v in key_set:
         df = df_raw.loc[df_raw["C"] == v]
-        df.loc[:, "B"] = df["B"].apply(datetime_to_date)
         df2 = df.sort_values(by=["B"])
         df2.reset_index(drop=True, inplace=True)
         write_one_product(

@@ -8,8 +8,8 @@
             "enable": true,
             "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
             "path": "",
-            "page_height_A4": 850,
-            "page_height_A5": 425
+            "page_height_A4": 830,
+            "page_height_A5": 380
         },
         "product": {
             "input": {
@@ -25,15 +25,17 @@
                 "stamp": {
                     "enable": true,
                     "path": "",
-                    "column_cover": "C",
-                    "column_product": "D",
-                    "x_scale": 0.24,
-                    "y_scale": 0.254,
                     "cover": {
+                        "column": "B",
+                        "x_scale": 0.24,
+                        "y_scale": 0.237,
                         "x_offset": 20,
                         "y_offset": 2
                     },
                     "product": {
+                        "column": "D",
+                        "x_scale": 0.24,
+                        "y_scale": 0.254,
                         "x_offset": 35,
                         "y_offset": 2
                     }
@@ -41,6 +43,12 @@
             },
             "output": {
                 "cover": {
+                    "page_margin": {
+                        "left": 1.78,
+                        "right": 1.78,
+                        "top": 1,
+                        "bottom": 1
+                    },
                     "column_width": {
                         "A": 23.0,
                         "B": 21.0,
@@ -219,6 +227,7 @@
                                 "font_size": 8,
                                 "align": "centre",
                                 "valign": "vcentre",
+                                "text_wrap": true,
                                 "border": 1
                             }
                         ]
@@ -283,8 +292,8 @@
             "enable": true,
             "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
             "path": "",
-            "page_height_A4": 850,
-            "page_height_A5": 425
+            "page_height_A4": 830,
+            "page_height_A5": 380
         },
         "product": {
             "input": {
@@ -300,15 +309,17 @@
                 "stamp": {
                     "enable": true,
                     "path": "",
-                    "column_cover": "C",
-                    "column_product": "D",
-                    "x_scale": 0.24,
-                    "y_scale": 0.254,
                     "cover": {
+                        "column": "B",
+                        "x_scale": 0.24,
+                        "y_scale": 0.237,
                         "x_offset": 20,
                         "y_offset": 2
                     },
                     "product": {
+                        "column": "D",
+                        "x_scale": 0.24,
+                        "y_scale": 0.254,
                         "x_offset": 35,
                         "y_offset": 2
                     }
@@ -316,13 +327,19 @@
             },
             "output": {
                 "cover": {
+                    "page_margin": {
+                        "left": 1.78,
+                        "right": 1.78,
+                        "top": 1,
+                        "bottom": 1
+                    },
                     "column_width": {
-                        "A": "23",
-                        "B": "21",
-                        "C": "23"
+                        "A": 23.0,
+                        "B": 21.0,
+                        "C": 23.0
                     },
                     "row1": {
-                        "height": "48",
+                        "height": 48,
                         "contents": [
                             "@@@@年####月驻琼部队副食品区域集中筹措物资【封面】"
                         ],
@@ -337,7 +354,7 @@
                         ]
                     },
                     "row2": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "供应商：||||                       每日汇总表"
                         ],
@@ -351,7 +368,7 @@
                         ]
                     },
                     "row3": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "灶点号,收货日期,金额"
                         ],
@@ -366,7 +383,7 @@
                         ]
                     },
                     "row_data": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [],
                         "formats": [
                             {
@@ -388,7 +405,7 @@
                         ]
                     },
                     "row_last": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "（盖章）"
                         ],
@@ -426,7 +443,7 @@
                         "H": 9.73
                     },
                     "row1": {
-                        "height": "48",
+                        "height": 48,
                         "contents": [
                             "@@@@年####月驻琼部队副食品区域集中筹措物资明细表"
                         ],
@@ -441,7 +458,7 @@
                         ]
                     },
                     "row2": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "报账单编号："
                         ],
@@ -455,7 +472,7 @@
                         ]
                     },
                     "row3": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "供应商：||||",
                             "灶点：",
@@ -471,7 +488,7 @@
                         ]
                     },
                     "row4": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "序号,收货日期,订单编号,商品名称,计量单位,单价,数量,金额"
                         ],
@@ -486,7 +503,7 @@
                         ]
                     },
                     "row_data": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [],
                         "formats": [
                             {
@@ -494,12 +511,13 @@
                                 "font_size": 8,
                                 "align": "centre",
                                 "valign": "vcentre",
+                                "text_wrap": true,
                                 "border": 1
                             }
                         ]
                     },
                     "row_sum_1": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "小计"
                         ],
@@ -515,7 +533,7 @@
                         ]
                     },
                     "row_sum_2": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "本账单合计"
                         ],
@@ -531,7 +549,7 @@
                         ]
                     },
                     "row_last": {
-                        "height": "15",
+                        "height": 15,
                         "contents": [
                             "（盖章）"
                         ],

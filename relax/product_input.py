@@ -53,6 +53,10 @@ def read_one_product(
     #    本账单合计：支付信息:报账金额（元）
 
 
+def datetime_to_date(date_str: str) -> str:
+    return f"{date_str[5:7]}月{date_str[8:10]}日"
+
+
 def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
     columns = get_multindex_columns(usecols_str, column_sep_1, column_sep_2)
     # 订单编号 A, 报账单编号 K
@@ -62,6 +66,9 @@ def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
         product_path, header=[0, 1], dtype={order_no: "str", bill_no: "str"}
     )
     df = df[columns]
-    df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
     # 一共13个
+    df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
+    # 订单已撤销:报账单编号为空
+    df.dropna(subset=["K"], inplace=True)
+    df.loc[:, "B"] = df["B"].apply(datetime_to_date)
     return df
