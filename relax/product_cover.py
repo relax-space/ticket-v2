@@ -1,7 +1,7 @@
 import copy
 from pandas import DataFrame, isnull as pd_isnull
 from relax.excel_common import get_row_height_content, make_stamp, set_page_size
-from relax.util import const_re, fill_zero_2, _config_data
+from relax.util import const_re, fill_zero_2, global_config_data
 from datetime import datetime
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
@@ -203,7 +203,9 @@ def write_all_cover(
     output_folder_path,
     product_size_dict,
 ):
-    output_folder_path = os_path.join(output_folder_path, _config_data["temp_cover"])
+    output_folder_path = os_path.join(
+        output_folder_path, global_config_data["temp_cover"]
+    )
     if not os_path.isdir(output_folder_path):
         makedirs(output_folder_path)
     product_input = copy.deepcopy(current_data["product"]["input"])

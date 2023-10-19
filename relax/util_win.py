@@ -1,7 +1,5 @@
 from tkinter import END, Text, Tk, BooleanVar
-
-_widgets = {}
-_dict_chk_var = {"_import_var": "", "_page_size_var": "", "_stamp_var": ""}
+from relax.util import global_widgets
 
 
 def center_window(root: Tk, w, h):
@@ -13,7 +11,7 @@ def center_window(root: Tk, w, h):
 
 
 def log_product(content: str):
-    txt_product_log: Text = _widgets["txt_product_log"]
+    txt_product_log: Text = global_widgets["txt_product_log"]
     txt_product_log.configure(state="normal")
     txt_product_log.insert(END, f"{content}\n")
     txt_product_log.see(END)
@@ -21,7 +19,7 @@ def log_product(content: str):
 
 
 def log_product_clear():
-    txt_product_log: Text = _widgets["txt_product_log"]
+    txt_product_log: Text = global_widgets["txt_product_log"]
     txt_product_log.configure(state="normal")
     txt_product_log.delete("1.0", END)
     txt_product_log.configure(state="disabled")

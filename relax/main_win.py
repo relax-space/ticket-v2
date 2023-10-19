@@ -7,6 +7,7 @@ from tkinter import (
     Y,
     BooleanVar,
     Frame,
+    StringVar,
     Tk,
 )
 from tkinter.ttk import Combobox, Notebook
@@ -18,8 +19,14 @@ from relax.menu_win import init_fr_menu
 from relax.ticket_win_data import render_ticket_data
 from relax.top_win import init_fr_top
 from relax.top_win_data import render_top_data
-from relax.util import init_const, init_raw_data, _raw_data
-from relax.util_win import _widgets, center_window, _dict_chk_var
+from relax.util import (
+    init_const,
+    init_raw_data,
+    global_widgets,
+    global_dict_chk_var,
+    global_raw_data,
+)
+from relax.util_win import center_window
 from os import path as os_path, makedirs
 
 
@@ -44,13 +51,13 @@ def init_view(root):
     ndb.add(fr_ticket, text="发票清单")
     ndb.pack(padx=10, pady=5, expand=True, fill=BOTH)
 
-    _widgets["root"] = root
-    _widgets["fr_menu"] = fr_menu
-    _widgets["fr_top"] = fr_top
-    _widgets["fr_top_1"] = fr_top_1
-    _widgets["ndb"] = ndb
-    _widgets["fr_product"] = fr_product
-    _widgets["fr_ticket"] = fr_ticket
+    global_widgets["root"] = root
+    global_widgets["fr_menu"] = fr_menu
+    global_widgets["fr_top"] = fr_top
+    global_widgets["fr_top_1"] = fr_top_1
+    global_widgets["ndb"] = ndb
+    global_widgets["fr_product"] = fr_product
+    global_widgets["fr_ticket"] = fr_ticket
 
     init_fr_menu()
     init_fr_top()
@@ -64,7 +71,7 @@ def init_data():
     current_data = {}
     current_menu_index = 0
     menu_list = []
-    for i, v in enumerate(_raw_data):
+    for i, v in enumerate(global_raw_data):
         if v["checked"]:
             current_data = v
             current_menu_index = i
@@ -96,10 +103,11 @@ def main_win_start():
     create_folder()
 
     root = Tk()
-    _widgets["root"] = root
-    _dict_chk_var["_import_var"] = BooleanVar()
-    _dict_chk_var["_page_size_var"] = BooleanVar()
-    _dict_chk_var["_stamp_var"] = BooleanVar()
+    global_widgets["root"] = root
+    global_dict_chk_var["_import_var"] = BooleanVar()
+    global_dict_chk_var["_page_size_var"] = BooleanVar()
+    global_dict_chk_var["_stamp_var"] = BooleanVar()
+    global_dict_chk_var["_import_var_option"] = StringVar()
     init_view(root)
     init_data()
     root.mainloop()

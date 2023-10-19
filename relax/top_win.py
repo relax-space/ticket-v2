@@ -13,14 +13,18 @@ from tkinter import (
     messagebox,
 )
 from relax.product_win_data import json_product_data
-from relax.util import get_current_data, update_raw_data
+from relax.util import (
+    get_current_data,
+    update_raw_data,
+    global_widgets,
+    global_dict_chk_var,
+)
 
-from relax.util_win import _widgets, _dict_chk_var
 from relax.win_data import json_data
 
 
 def save_template():
-    lst_menu = _widgets["lst_menu"]
+    lst_menu = global_widgets["lst_menu"]
     indexs = lst_menu.curselection()
     if not indexs:
         messagebox.showinfo("警告", "请先在左边选择一个模板！")
@@ -36,7 +40,7 @@ def save_template():
 
 
 def set_output_folder():
-    lst_menu: Listbox = _widgets["lst_menu"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
     if not lst_menu.curselection():
         messagebox.showinfo("提示", "请先在左边选择一个模板")
         return
@@ -44,28 +48,28 @@ def set_output_folder():
     if not folder_path:
         return
 
-    ety_output_path: Entry = _widgets["ety_output_path"]
+    ety_output_path: Entry = global_widgets["ety_output_path"]
     ety_output_path.delete(0, END)
     ety_output_path.insert(0, folder_path)
     pass
 
 
 def page_size_click():
-    lst_menu: Listbox = _widgets["lst_menu"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
     if not lst_menu.curselection():
         messagebox.showinfo("提示", "请先在左边选择一个模板")
         return
     file_path = filedialog.askopenfilename()
     if not file_path:
         return
-    ety_page_size: Entry = _widgets["ety_page_size"]
+    ety_page_size: Entry = global_widgets["ety_page_size"]
     ety_page_size.delete(0, END)
     ety_page_size.insert(0, file_path)
     pass
 
 
 def init_fr_top():
-    fr_top: Frame = _widgets["fr_top"]
+    fr_top: Frame = global_widgets["fr_top"]
     btn_master_edit = Button(fr_top, text="保存为模板", command=save_template)
     lbl_supplier_name = Label(fr_top, text="供应商名称：*", fg="red")
     ety_supplier_name = Entry(fr_top, width=60)
@@ -75,7 +79,7 @@ def init_fr_top():
     btn_output_path = Button(fr_top, text="选择", command=set_output_folder)
 
     chk_page_size = Checkbutton(
-        fr_top, text="是否批量设置页面尺寸：", variable=_dict_chk_var["_page_size_var"]
+        fr_top, text="是否批量设置页面尺寸：", variable=global_dict_chk_var["_page_size_var"]
     )
     lbl_remark_2 = Label(fr_top, text="(如果不勾选，下面的设置不会生效)")
     lbl_page_size = Label(fr_top, text="尺寸表：")
@@ -102,14 +106,14 @@ def init_fr_top():
     ety_page_size.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
     btn_page_size.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
 
-    _widgets["ety_supplier_name"] = ety_supplier_name
-    _widgets["ety_output_path"] = ety_output_path
+    global_widgets["ety_supplier_name"] = ety_supplier_name
+    global_widgets["ety_output_path"] = ety_output_path
 
-    _widgets["chk_page_size"] = chk_page_size
-    _widgets["ety_page_size"] = ety_page_size
-    _widgets["btn_page_size"] = btn_page_size
+    global_widgets["chk_page_size"] = chk_page_size
+    global_widgets["ety_page_size"] = ety_page_size
+    global_widgets["btn_page_size"] = btn_page_size
 
-    fr_top_1 = _widgets["fr_top_1"]
+    fr_top_1 = global_widgets["fr_top_1"]
     lbl_page_height = Label(fr_top_1, text="页面高度：")
     lbl_A4_page_height = Label(fr_top_1, text="A4：")
     ety_A4_page_height = Entry(fr_top_1, width=6, justify=RIGHT)
@@ -125,6 +129,6 @@ def init_fr_top():
     )
     ety_A5_page_height.grid(row=row_index, column=4, pady=(3, 0), sticky=W)
 
-    _widgets["ety_A4_page_height"] = ety_A4_page_height
-    _widgets["ety_A5_page_height"] = ety_A5_page_height
+    global_widgets["ety_A4_page_height"] = ety_A4_page_height
+    global_widgets["ety_A5_page_height"] = ety_A5_page_height
     pass

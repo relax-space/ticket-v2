@@ -1,7 +1,10 @@
-from os import path as os_path
+from os import path as os_path, listdir, rename
+from shutil import copyfile
 from pandas import read_excel
 from math import floor
 from xlsxwriter.worksheet import Worksheet
+
+from relax.util import loop_name
 
 
 def get_page_size_list(batch_size: dict) -> tuple[dict, dict]:
@@ -17,12 +20,13 @@ def get_page_size_list(batch_size: dict) -> tuple[dict, dict]:
     zd_set = set()
     product_size_dict = {}
     ticket_size_dict = {}
+    df.dropna(subset=["C", "E"], inplace=True)
     for _, v in df.iterrows():
         zd = v["A"]
         p1_size = v["B"]
-        p1_quantity = v["C"]
+        p1_quantity = int(v["C"])
         p2_size = v["D"]
-        p2_quantity = v["E"]
+        p2_quantity = int(v["E"])
         for i in [p1_size, p2_size]:
             if i not in ["A4", "A5"]:
                 continue
@@ -171,4 +175,107 @@ def make_stamp(ws1: Worksheet, row_height_list: list, page_height: int, stamp: d
         dic_img,
     )
     ws1.set_h_pagebreaks(break_list)
+    pass
+
+
+def callback_product_name(target_path, zd, i, order_mark, page_size, postfix):
+    return f"{zd}-{i}{order_mark}-{page_size}.{postfix}"
+
+
+def callback_ticket_name(target_path, zd, i, order_mark, page_size, postfix):
+    return f"{zd}-{0}{order_mark}{i}-{page_size}.{postfix}"
+
+
+def make_ticket_special_print(target_path, zd, i, order_mark, page_size, postfix):
+    pre = f"{zd}-0{order_mark}{i}"
+    post = f"-{page_size}.{postfix}"
+    return loop_name(target_path, pre, post, i)
+
+
+def make_specail_ticket(
+    ticket_size_dict: dict,
+    source_path: str,
+    sep: str,
+    target_path: str,
+    order_mark: str,
+    postfix: str,
+    callback: str,
+):
+    file_list = listdir(source_path)
+    specail_list: list[str] = []
+    for i in file_list:
+        if sep not in i:
+            continue
+        specail_list.append(i)
+
+    for i in specail_list:
+        lst = i.lstrip(sep, 1)
+        zd = lst[0]
+        one_size = ticket_size_dict[zd]
+        make_print_file_one(
+            zd,
+            one_size["page_size"],
+            one_size["page_quantity"],
+            source_path,
+            target_path,
+            order_mark,
+            postfix,
+            callback,
+        )
+    pass
+
+
+def make_print_file_one(
+    zd: str,
+    page_size: str,
+    page_quantity: int,
+    source_path: str,
+    target_path: str,
+    order_mark: str,
+    postfix: str,
+    callback,
+):
+    source_file_path = os_path.join(source_path, f"{zd}.{postfix}")
+    if not os_path.isfile(source_file_path):
+        return
+    for i in range(page_quantity):
+        target_name = callback(target_path, zd, i, order_mark, page_size, postfix)
+        copyfile(source_file_path, os_path.join(target_path, target_name))
+
+
+def move_to_print_folder(source_path: str, target_path: str, order_mark: str):
+    file_list = listdir(source_path)
+    for i in file_list:
+        lst = i.rsplit(".", 1)
+        if len(lst) != 2:
+            continue
+        rename(
+            os_path.join(source_path, i),
+            os_path.join(target_path, f"{lst[0]}{order_mark}{lst[1]}"),
+        )
+    pass
+
+
+def make_print_file_all(
+    size_dict: dict,
+    source_path: str,
+    target_path: str,
+    order_mark: str,
+    postfix: str,
+    callback,
+):
+    for v in size_dict.values():
+        zd = v["zd"]
+        page_size = v["page_size"]
+        page_quantity = v["page_quantity"]
+        make_print_file_one(
+            zd,
+            page_size,
+            page_quantity,
+            source_path,
+            target_path,
+            order_mark,
+            postfix,
+            callback,
+        )
     pass

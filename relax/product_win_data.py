@@ -1,18 +1,19 @@
-from tkinter import END, Checkbutton, Entry
-from relax.util_win import _widgets, _dict_chk_var
+from tkinter import END, Entry
+from relax.util import global_widgets, global_dict_chk_var
 
 
 def json_template_input(current_data: dict):
-    product_input = current_data["product"]["input"]
-    batch_import = product_input["batch_import"]
-    batch_import["enable"] = _dict_chk_var["_import_var"].get()
-    batch_import["path"] = _widgets["ety_import"].get()
+    import_list = current_data["product"]["output"]["import_list"]
+    import_list["enable"] = global_dict_chk_var["_import_var"].get()
+    import_list["path"] = global_widgets["ety_import"].get()
+    import_list["default_value"] = global_dict_chk_var["_import_var_option"].get()
 
+    product_input = current_data["product"]["input"]
     stamp = product_input["stamp"]
-    stamp["enable"] = _dict_chk_var["_stamp_var"].get()
-    stamp["path"] = _widgets["ety_stamp"].get()
-    ety_X_stamp_scale_cover = _widgets["ety_X_stamp_scale_cover"].get()
-    ety_Y_stamp_scale_cover = _widgets["ety_Y_stamp_scale_cover"].get()
+    stamp["enable"] = global_dict_chk_var["_stamp_var"].get()
+    stamp["path"] = global_widgets["ety_stamp"].get()
+    ety_X_stamp_scale_cover = global_widgets["ety_X_stamp_scale_cover"].get()
+    ety_Y_stamp_scale_cover = global_widgets["ety_Y_stamp_scale_cover"].get()
     stamp_cover = stamp["cover"]
     stamp_cover["x_scale"] = (
         float(ety_X_stamp_scale_cover) if ety_X_stamp_scale_cover else 0.0
@@ -21,8 +22,8 @@ def json_template_input(current_data: dict):
         float(ety_Y_stamp_scale_cover) if ety_Y_stamp_scale_cover else 0.0
     )
 
-    ety_X_stamp_scale_product = _widgets["ety_X_stamp_scale_product"].get()
-    ety_Y_stamp_scale_product = _widgets["ety_Y_stamp_scale_product"].get()
+    ety_X_stamp_scale_product = global_widgets["ety_X_stamp_scale_product"].get()
+    ety_Y_stamp_scale_product = global_widgets["ety_Y_stamp_scale_product"].get()
     stamp_product = stamp["product"]
     stamp_product["x_scale"] = (
         float(ety_X_stamp_scale_product) if ety_X_stamp_scale_product else 0.0
@@ -35,16 +36,16 @@ def json_template_input(current_data: dict):
 
 
 def json_template_output_cover(current_data: dict):
-    ety_row_height_cover_1: Entry = _widgets[f"ety_row_height_cover_0"]
-    ety_row_height_cover_2: Entry = _widgets[f"ety_row_height_cover_1"]
-    ety_row_height_cover_3: Entry = _widgets[f"ety_row_height_cover_2"]
-    ety_row_height_cover_4: Entry = _widgets[f"ety_row_height_cover_3"]
-    ety_row_height_cover_5: Entry = _widgets[f"ety_row_height_cover_4"]
+    ety_row_height_cover_1: Entry = global_widgets[f"ety_row_height_cover_0"]
+    ety_row_height_cover_2: Entry = global_widgets[f"ety_row_height_cover_1"]
+    ety_row_height_cover_3: Entry = global_widgets[f"ety_row_height_cover_2"]
+    ety_row_height_cover_4: Entry = global_widgets[f"ety_row_height_cover_3"]
+    ety_row_height_cover_5: Entry = global_widgets[f"ety_row_height_cover_4"]
 
     cover = current_data["product"]["output"]["cover"]
     cover_column_width = cover["column_width"]
     for i in ["A", "B", "C"]:
-        ety_column_width_cover = _widgets[f"ety_column_width_cover_{i}"].get()
+        ety_column_width_cover = global_widgets[f"ety_column_width_cover_{i}"].get()
         cover_column_width[i] = (
             float(ety_column_width_cover) if ety_column_width_cover else 0
         )
@@ -74,19 +75,19 @@ def json_template_output_cover(current_data: dict):
 
 
 def json_template_output_product(current_data: dict):
-    ety_row_height_product_1: Entry = _widgets[f"ety_row_height_product_0"]
-    ety_row_height_product_2: Entry = _widgets[f"ety_row_height_product_1"]
-    ety_row_height_product_3: Entry = _widgets[f"ety_row_height_product_2"]
-    ety_row_height_product_4: Entry = _widgets[f"ety_row_height_product_3"]
-    ety_row_height_product_5: Entry = _widgets[f"ety_row_height_product_4"]
-    ety_row_height_product_6: Entry = _widgets[f"ety_row_height_product_5"]
-    ety_row_height_product_7: Entry = _widgets[f"ety_row_height_product_6"]
-    ety_row_height_product_8: Entry = _widgets[f"ety_row_height_product_7"]
+    ety_row_height_product_1: Entry = global_widgets[f"ety_row_height_product_0"]
+    ety_row_height_product_2: Entry = global_widgets[f"ety_row_height_product_1"]
+    ety_row_height_product_3: Entry = global_widgets[f"ety_row_height_product_2"]
+    ety_row_height_product_4: Entry = global_widgets[f"ety_row_height_product_3"]
+    ety_row_height_product_5: Entry = global_widgets[f"ety_row_height_product_4"]
+    ety_row_height_product_6: Entry = global_widgets[f"ety_row_height_product_5"]
+    ety_row_height_product_7: Entry = global_widgets[f"ety_row_height_product_6"]
+    ety_row_height_product_8: Entry = global_widgets[f"ety_row_height_product_7"]
 
     product_detail = current_data["product"]["output"]["product_detail"]
     product_column_width = product_detail["column_width"]
     for i in ["A", "B", "C", "D", "E", "C", "F", "G", "H"]:
-        ety_column_width_product = _widgets[f"ety_column_width_product_{i}"].get()
+        ety_column_width_product = global_widgets[f"ety_column_width_product_{i}"].get()
         product_column_width[i] = (
             float(ety_column_width_product) if ety_column_width_product else 0
         )
@@ -128,25 +129,27 @@ def json_template_output_product(current_data: dict):
 
 
 def render_input(current_data: dict):
-    ety_product_input: Entry = _widgets["ety_product_input"]
-    ety_import: Entry = _widgets["ety_import"]
-    ety_stamp: Entry = _widgets["ety_stamp"]
-    ety_X_stamp_scale_cover: Entry = _widgets["ety_X_stamp_scale_cover"]
-    ety_Y_stamp_scale_cover: Entry = _widgets["ety_Y_stamp_scale_cover"]
+    ety_product_input: Entry = global_widgets["ety_product_input"]
+    ety_import: Entry = global_widgets["ety_import"]
+    ety_stamp: Entry = global_widgets["ety_stamp"]
+    ety_X_stamp_scale_cover: Entry = global_widgets["ety_X_stamp_scale_cover"]
+    ety_Y_stamp_scale_cover: Entry = global_widgets["ety_Y_stamp_scale_cover"]
 
-    ety_X_stamp_scale_product: Entry = _widgets["ety_X_stamp_scale_product"]
-    ety_Y_stamp_scale_product: Entry = _widgets["ety_Y_stamp_scale_product"]
+    ety_X_stamp_scale_product: Entry = global_widgets["ety_X_stamp_scale_product"]
+    ety_Y_stamp_scale_product: Entry = global_widgets["ety_Y_stamp_scale_product"]
+
+    import_list = current_data["product"]["output"]["import_list"]
+    global_dict_chk_var["_import_var"].set(import_list["enable"])
+    ety_import.delete(0, END)
+    ety_import.insert(END, import_list["path"])
+    global_dict_chk_var["_import_var_option"].set(import_list["default_value"])
 
     product_input = current_data["product"]["input"]
     ety_product_input.delete(0, END)
     ety_product_input.insert(END, product_input["product_path"])
-    batch_import = product_input["batch_import"]
-    _dict_chk_var["_import_var"].set(batch_import["enable"])
-    ety_import.delete(0, END)
-    ety_import.insert(END, batch_import["path"])
 
     stamp = product_input["stamp"]
-    _dict_chk_var["_stamp_var"].set(stamp["enable"])
+    global_dict_chk_var["_stamp_var"].set(stamp["enable"])
     ety_stamp.delete(0, END)
     ety_stamp.insert(END, stamp["path"])
 
@@ -166,17 +169,17 @@ def render_input(current_data: dict):
 
 
 def render_output_cover(current_data: dict):
-    ety_row_height_cover_1: Entry = _widgets[f"ety_row_height_cover_0"]
-    ety_row_height_cover_2: Entry = _widgets[f"ety_row_height_cover_1"]
-    ety_row_height_cover_3: Entry = _widgets[f"ety_row_height_cover_2"]
-    ety_row_height_cover_4: Entry = _widgets[f"ety_row_height_cover_3"]
-    ety_row_height_cover_5: Entry = _widgets[f"ety_row_height_cover_4"]
+    ety_row_height_cover_1: Entry = global_widgets[f"ety_row_height_cover_0"]
+    ety_row_height_cover_2: Entry = global_widgets[f"ety_row_height_cover_1"]
+    ety_row_height_cover_3: Entry = global_widgets[f"ety_row_height_cover_2"]
+    ety_row_height_cover_4: Entry = global_widgets[f"ety_row_height_cover_3"]
+    ety_row_height_cover_5: Entry = global_widgets[f"ety_row_height_cover_4"]
 
     cover = current_data["product"]["output"]["cover"]
     cover_column_width = cover["column_width"]
     for i in ["A", "B", "C"]:
-        _widgets[f"ety_column_width_cover_{i}"].delete(0, END)
-        _widgets[f"ety_column_width_cover_{i}"].insert(END, cover_column_width[i])
+        global_widgets[f"ety_column_width_cover_{i}"].delete(0, END)
+        global_widgets[f"ety_column_width_cover_{i}"].insert(END, cover_column_width[i])
 
     ety_row_height_cover_1.delete(0, END)
     ety_row_height_cover_2.delete(0, END)
@@ -192,20 +195,22 @@ def render_output_cover(current_data: dict):
 
 
 def render_output_product(current_data: dict):
-    ety_row_height_product_1: Entry = _widgets[f"ety_row_height_product_0"]
-    ety_row_height_product_2: Entry = _widgets[f"ety_row_height_product_1"]
-    ety_row_height_product_3: Entry = _widgets[f"ety_row_height_product_2"]
-    ety_row_height_product_4: Entry = _widgets[f"ety_row_height_product_3"]
-    ety_row_height_product_5: Entry = _widgets[f"ety_row_height_product_4"]
-    ety_row_height_product_6: Entry = _widgets[f"ety_row_height_product_5"]
-    ety_row_height_product_7: Entry = _widgets[f"ety_row_height_product_6"]
-    ety_row_height_product_8: Entry = _widgets[f"ety_row_height_product_7"]
+    ety_row_height_product_1: Entry = global_widgets[f"ety_row_height_product_0"]
+    ety_row_height_product_2: Entry = global_widgets[f"ety_row_height_product_1"]
+    ety_row_height_product_3: Entry = global_widgets[f"ety_row_height_product_2"]
+    ety_row_height_product_4: Entry = global_widgets[f"ety_row_height_product_3"]
+    ety_row_height_product_5: Entry = global_widgets[f"ety_row_height_product_4"]
+    ety_row_height_product_6: Entry = global_widgets[f"ety_row_height_product_5"]
+    ety_row_height_product_7: Entry = global_widgets[f"ety_row_height_product_6"]
+    ety_row_height_product_8: Entry = global_widgets[f"ety_row_height_product_7"]
 
     product_detail = current_data["product"]["output"]["product_detail"]
     product_column_width = product_detail["column_width"]
     for i in ["A", "B", "C", "D", "E", "C", "F", "G", "H"]:
-        _widgets[f"ety_column_width_product_{i}"].delete(0, END)
-        _widgets[f"ety_column_width_product_{i}"].insert(END, product_column_width[i])
+        global_widgets[f"ety_column_width_product_{i}"].delete(0, END)
+        global_widgets[f"ety_column_width_product_{i}"].insert(
+            END, product_column_width[i]
+        )
 
     ety_row_height_product_1.delete(0, END)
     ety_row_height_product_2.delete(0, END)

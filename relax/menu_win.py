@@ -21,11 +21,12 @@ from tkinter import (
 from relax.product_win_data import render_product_data
 from relax.ticket_win_data import render_ticket_data
 from relax.top_win_data import render_top_data
-from relax.util_win import _widgets, center_window
+from relax.util_win import center_window
 from PIL import Image, ImageTk
 import tkinter.font as tkFont
 from relax.util import (
-    _raw_data,
+    global_widgets,
+    global_raw_data,
     delete_current_data,
     get_current_data,
     get_template_data,
@@ -36,7 +37,7 @@ from relax.win_data import render_data
 
 
 def show_top(tip, default_content, on_event):
-    root = _widgets["root"]
+    root = global_widgets["root"]
     popup = Toplevel(root)
     popup.title(tip)
     center_window(popup, 200, 100)
@@ -50,7 +51,7 @@ def show_top(tip, default_content, on_event):
     ety.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 10))
 
     def exist_item(name):
-        lst_menu: Listbox = _widgets["lst_menu"]
+        lst_menu: Listbox = global_widgets["lst_menu"]
         menu_list = lst_menu.get(0, END)
         for v in menu_list:
             if v == name:
@@ -84,16 +85,16 @@ def on_default(lst_menu: Listbox):
     key = lst_menu.get(index)
 
     current_data_index = 0
-    for i, v in enumerate(_raw_data):
+    for i, v in enumerate(global_raw_data):
         v["checked"] = False
         if v["menu_name"] == key:
             current_data_index = i
-    current_data = _raw_data.pop(current_data_index)
+    current_data = global_raw_data.pop(current_data_index)
     current_data["checked"] = True
-    _raw_data.insert(0, current_data)
+    global_raw_data.insert(0, current_data)
 
     lst_menu.delete(0, END)
-    for i in _raw_data:
+    for i in global_raw_data:
         lst_menu.insert(END, i["menu_name"])
     lst_menu.select_set(0)
 
@@ -110,7 +111,7 @@ def on_add(lst_menu: Listbox):
         t_data = copy.deepcopy(get_template_data())
         t_data["menu_name"] = new_name
         render_data(t_data)
-        _raw_data.append(t_data)
+        global_raw_data.append(t_data)
         update_raw_data()
         pass
 
@@ -239,14 +240,14 @@ def init_bottom(fr_1: Frame) -> Listbox:
     sb_menu.pack(side=RIGHT, fill=Y)
     lst_menu.pack(fill=BOTH, expand=True)
 
-    _widgets["lst_menu"] = lst_menu
+    global_widgets["lst_menu"] = lst_menu
     return lst_menu
 
     pass
 
 
 def init_fr_menu():
-    fr_menu = _widgets["fr_menu"]
+    fr_menu = global_widgets["fr_menu"]
     fr_1 = Frame(fr_menu)
     fr_1.pack(fill=X)
 

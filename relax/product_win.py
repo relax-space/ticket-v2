@@ -3,12 +3,20 @@
 """
 import time
 from tkinter.font import Font
+
+from pandas import DataFrame
 from relax.excel_common import get_page_size_list
 from relax.product_cover import write_all_cover
 from relax.product_detail import write_all_product
-from relax.product_input import read_one_product, read_all_product
-from relax.util import fill_zero_2, get_current_data
-from relax.util_win import _widgets, _dict_chk_var, log_product, log_product_clear
+from relax.product_import import make_import_file
+from relax.product_input import get_all_base, read_one_product, read_all_product
+from relax.product_print import make_product_file
+from relax.util import (
+    fill_zero_2,
+    get_current_data,
+    global_widgets,
+    global_dict_chk_var,
+)
 from os import path as os_path, makedirs
 from traceback import format_exc
 from tkinter import (
@@ -28,6 +36,7 @@ from tkinter import (
     Frame,
     Label,
     Listbox,
+    Radiobutton,
     Scrollbar,
     Text,
     filedialog,
@@ -38,7 +47,7 @@ from relax.win_data import json_data
 
 
 def path_click():
-    lst_menu: Listbox = _widgets["lst_menu"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
     if not lst_menu.curselection():
         messagebox.showinfo("提示", "请先在左边选择一个模板")
         return
@@ -46,26 +55,26 @@ def path_click():
     file_path = filedialog.askopenfilename()
     if not file_path:
         return
-    ety_product_input: Entry = _widgets["ety_product_input"]
+    ety_product_input: Entry = global_widgets["ety_product_input"]
     ety_product_input.delete(0, END)
     ety_product_input.insert(0, file_path)
     pass
 
 
 def create_click_raw():
-    lst_menu: Listbox = _widgets["lst_menu"]
-    ety_supplier_name: Entry = _widgets["ety_supplier_name"]
-    ety_output_path: Entry = _widgets["ety_output_path"]
-    ety_product_input: Entry = _widgets["ety_product_input"]
-    ety_import: Entry = _widgets["ety_import"]
-    ety_page_size: Entry = _widgets["ety_page_size"]
-    ety_A4_page_height: Entry = _widgets["ety_A4_page_height"]
-    ety_A5_page_height: Entry = _widgets["ety_A5_page_height"]
-    ety_stamp: Entry = _widgets["ety_stamp"]
-    ety_X_stamp_scale_cover: Entry = _widgets["ety_X_stamp_scale_cover"]
-    ety_Y_stamp_scale_cover: Entry = _widgets["ety_Y_stamp_scale_cover"]
-    ety_X_stamp_scale_product: Entry = _widgets["ety_X_stamp_scale_product"]
-    ety_Y_stamp_scale_product: Entry = _widgets["ety_Y_stamp_scale_product"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
+    ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
+    ety_output_path: Entry = global_widgets["ety_output_path"]
+    ety_product_input: Entry = global_widgets["ety_product_input"]
+    ety_import: Entry = global_widgets["ety_import"]
+    ety_page_size: Entry = global_widgets["ety_page_size"]
+    ety_A4_page_height: Entry = global_widgets["ety_A4_page_height"]
+    ety_A5_page_height: Entry = global_widgets["ety_A5_page_height"]
+    ety_stamp: Entry = global_widgets["ety_stamp"]
+    ety_X_stamp_scale_cover: Entry = global_widgets["ety_X_stamp_scale_cover"]
+    ety_Y_stamp_scale_cover: Entry = global_widgets["ety_Y_stamp_scale_cover"]
+    ety_X_stamp_scale_product: Entry = global_widgets["ety_X_stamp_scale_product"]
+    ety_Y_stamp_scale_product: Entry = global_widgets["ety_Y_stamp_scale_product"]
 
     def create_click_valid():
         if not lst_menu.curselection():
@@ -85,11 +94,11 @@ def create_click_raw():
             ety_product_input.focus_set()
             return False
 
-        if _dict_chk_var["_import_var"] and not ety_import.get():
+        if global_dict_chk_var["_import_var"] and not ety_import.get():
             messagebox.showwarning("警告", "税率表不能为空！")
             ety_import.focus_set()
             return False
-        if _dict_chk_var["_page_size_var"]:
+        if global_dict_chk_var["_page_size_var"]:
             if not ety_page_size.get():
                 messagebox.showwarning("警告", "尺寸表不能为空！")
                 ety_page_size.focus_set()
@@ -102,7 +111,7 @@ def create_click_raw():
                 messagebox.showwarning("警告", "A5不能为空！")
                 ety_A5_page_height.focus_set()
                 return False
-        if _dict_chk_var["_stamp_var"]:
+        if global_dict_chk_var["_stamp_var"]:
             if not ety_stamp.get():
                 messagebox.showwarning("警告", "印章路径不能为空！")
                 ety_stamp.focus_set()
@@ -160,7 +169,6 @@ def create_click_raw():
     )
     if not os_path.isdir(output_folder_path):
         makedirs(output_folder_path)
-    # size_path: str, use_column_str: str, is_page_size: bool
     batch_size = current_data["batch_size"]
     zd_set, product_size_dict, ticket_size_dict = get_page_size_list(batch_size)
     df_set = set(df["C"].values)
@@ -169,6 +177,18 @@ def create_click_raw():
         if zd_difference:
             messagebox.showwarning("警告", f"尺寸表缺少灶点号：{zd_difference}")
             return
+    is_import = global_dict_chk_var["_import_var"]
+    df_bases = DataFrame()
+    if is_import:
+        base_file_path = current_data["product"]["output"]["import_list"]["path"]
+        df_bases = get_all_base(base_file_path)
+        df_set_tax = set(df_bases["商品名称"].values)
+        df_set_raw_product = set(df["E"].values)
+        zd_difference = df_set_raw_product.difference(df_set_tax)
+        if zd_difference:
+            messagebox.showwarning("警告", f"税率表缺少商品：{zd_difference}")
+            return
+        pass
     write_all_product(
         df_set,
         df,
@@ -191,6 +211,11 @@ def create_click_raw():
         output_folder_path,
         product_size_dict,
     )
+    if product_size_dict:
+        make_product_file(product_size_dict, output_folder_path)
+
+    if is_import:
+        make_import_file(current_data, output_folder_path, df_bases)
 
 
 def create_click():
@@ -201,28 +226,28 @@ def create_click():
 
 
 def import_click():
-    lst_menu: Listbox = _widgets["lst_menu"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
     if not lst_menu.curselection():
         messagebox.showinfo("提示", "请先在左边选择一个模板")
         return
     file_path = filedialog.askopenfilename()
     if not file_path:
         return
-    ety_import: Entry = _widgets["ety_import"]
+    ety_import: Entry = global_widgets["ety_import"]
     ety_import.delete(0, END)
     ety_import.insert(0, file_path)
     pass
 
 
 def stamp_click():
-    lst_menu: Listbox = _widgets["lst_menu"]
+    lst_menu: Listbox = global_widgets["lst_menu"]
     if not lst_menu.curselection():
         messagebox.showinfo("提示", "请先在左边选择一个模板")
         return
     file_path = filedialog.askopenfilename()
     if not file_path:
         return
-    ety_stamp: Entry = _widgets["ety_stamp"]
+    ety_stamp: Entry = global_widgets["ety_stamp"]
     ety_stamp.delete(0, END)
     ety_stamp.insert(0, file_path)
     pass
@@ -242,15 +267,33 @@ def fr_top(fr_product_top, fr_product_top_1):
     # btn_product_output = Button(fr_product_top, text="选择")
 
     chk_import = Checkbutton(
-        fr_product_top, text="是否批量生成导入列表：", variable=_dict_chk_var["_import_var"]
+        fr_product_top, text="是否批量生成导入列表：", variable=global_dict_chk_var["_import_var"]
     )
     lbl_remark_1 = Label(fr_product_top, text="(如果不勾选，下面的设置不会生效)")
     lbl_import = Label(fr_product_top, text="税率表：")
     ety_import = Entry(fr_product_top, width=60)
     btn_import = Button(fr_product_top, text="选择", command=import_click)
 
+    fr_import_option = Frame(fr_product_top)
+    lbl_import_option = Label(fr_import_option, text="导入模板：")
+    rdo_import_option_1 = Radiobutton(
+        fr_import_option,
+        text="诺诺",
+        value="诺诺",
+        variable=global_dict_chk_var["_import_var_option"],
+    )
+    rdo_import_option_2 = Radiobutton(
+        fr_import_option,
+        text="电子税务局",
+        value="电子税务局",
+        variable=global_dict_chk_var["_import_var_option"],
+    )
+    lbl_import_option.grid(row=0, column=0, sticky=E)
+    rdo_import_option_1.grid(row=0, column=1)
+    rdo_import_option_2.grid(row=0, column=2, padx=(20, 0))
+
     chk_stamp = Checkbutton(
-        fr_product_top, text="是否盖章：", variable=_dict_chk_var["_stamp_var"]
+        fr_product_top, text="是否盖章：", variable=global_dict_chk_var["_stamp_var"]
     )
     lbl_remark_3 = Label(fr_product_top, text="(如果不勾选，下面的设置不会生效)")
     lbl_stamp = Label(fr_product_top, text="印章路径：")
@@ -286,6 +329,9 @@ def fr_top(fr_product_top, fr_product_top_1):
     btn_import.grid(row=row_index, column=5, pady=(0, 3))
 
     row_index += 1
+    fr_import_option.grid(row=row_index, padx=(94, 0), column=0, columnspan=2)
+
+    row_index += 1
     chk_stamp.grid(row=row_index, column=0, pady=(0, 3), sticky=E)
     lbl_remark_3.grid(row=row_index, column=1, sticky="w", columnspan=4)
     row_index += 1
@@ -293,16 +339,16 @@ def fr_top(fr_product_top, fr_product_top_1):
     ety_stamp.grid(row=row_index, column=1, pady=(0, 3), columnspan=4)
     btn_stamp.grid(row=row_index, column=5, pady=(0, 3))
 
-    _widgets["ety_product_input"] = ety_product_input
-    _widgets["btn_product_input"] = btn_product_input
-    # _widgets["ety_product_output"] = ety_product_output
-    _widgets["chk_import"] = chk_import
-    _widgets["ety_import"] = ety_import
-    _widgets["btn_import"] = btn_import
+    global_widgets["ety_product_input"] = ety_product_input
+    global_widgets["btn_product_input"] = btn_product_input
+    # global_widgets["ety_product_output"] = ety_product_output
+    global_widgets["chk_import"] = chk_import
+    global_widgets["ety_import"] = ety_import
+    global_widgets["btn_import"] = btn_import
 
-    _widgets["chk_stamp"] = chk_stamp
-    _widgets["ety_stamp"] = ety_stamp
-    _widgets["btn_stamp"] = btn_stamp
+    global_widgets["chk_stamp"] = chk_stamp
+    global_widgets["ety_stamp"] = ety_stamp
+    global_widgets["btn_stamp"] = btn_stamp
 
     lbl_stamp_scale_cover = Label(fr_product_top_1, text="封面缩放：")
     lbl_X_stamp_scale_cover = Label(fr_product_top_1, text="宽度缩放：")
@@ -338,11 +384,11 @@ def fr_top(fr_product_top, fr_product_top_1):
     )
     ety_Y_stamp_scale_product.grid(row=row_index, column=4, pady=(3, 0), sticky=W)
 
-    _widgets["ety_X_stamp_scale_cover"] = ety_X_stamp_scale_cover
-    _widgets["ety_Y_stamp_scale_cover"] = ety_Y_stamp_scale_cover
+    global_widgets["ety_X_stamp_scale_cover"] = ety_X_stamp_scale_cover
+    global_widgets["ety_Y_stamp_scale_cover"] = ety_Y_stamp_scale_cover
 
-    _widgets["ety_X_stamp_scale_product"] = ety_X_stamp_scale_product
-    _widgets["ety_Y_stamp_scale_product"] = ety_Y_stamp_scale_product
+    global_widgets["ety_X_stamp_scale_product"] = ety_X_stamp_scale_product
+    global_widgets["ety_Y_stamp_scale_product"] = ety_Y_stamp_scale_product
 
     pass
 
@@ -364,15 +410,15 @@ def fr_cover(fr_product_bottom_1: Frame):
     for i in list:
         lbl_column_width = Label(fr_2, text=f"{i}:")
         ety_column_width = Entry(fr_2, width=6, justify=RIGHT)
-        _widgets[f"lbl_column_width_cover_{i}"] = lbl_column_width
-        _widgets[f"ety_column_width_cover_{i}"] = ety_column_width
+        global_widgets[f"lbl_column_width_cover_{i}"] = lbl_column_width
+        global_widgets[f"ety_column_width_cover_{i}"] = ety_column_width
 
     column_index = 0
-    lbl_column_width_title.grid(row=0, column=column_index, sticky=E)
+    lbl_column_width_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for v in list:
-        lbl_column_width: Label = _widgets[f"lbl_column_width_cover_{v}"]
-        ety_column_width: Entry = _widgets[f"ety_column_width_cover_{v}"]
+        lbl_column_width: Label = global_widgets[f"lbl_column_width_cover_{v}"]
+        ety_column_width: Entry = global_widgets[f"ety_column_width_cover_{v}"]
         lbl_column_width.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_column_width.grid(row=0, column=column_index, padx=(3, 2))
@@ -386,15 +432,15 @@ def fr_cover(fr_product_bottom_1: Frame):
     for i, v in enumerate(list):
         lbl_row_height = Label(fr_3, text=f"{v}:")
         ety_row_height = Entry(fr_3, width=3, justify=RIGHT)
-        _widgets[f"lbl_row_height_cover_{i}"] = lbl_row_height
-        _widgets[f"ety_row_height_cover_{i}"] = ety_row_height
+        global_widgets[f"lbl_row_height_cover_{i}"] = lbl_row_height
+        global_widgets[f"ety_row_height_cover_{i}"] = ety_row_height
 
     column_index = 0
-    lbl_row_height_title.grid(row=0, column=column_index, sticky=E)
+    lbl_row_height_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for i, v in enumerate(list):
-        lbl_row_height: Label = _widgets[f"lbl_row_height_cover_{i}"]
-        ety_row_height: Entry = _widgets[f"ety_row_height_cover_{i}"]
+        lbl_row_height: Label = global_widgets[f"lbl_row_height_cover_{i}"]
+        ety_row_height: Entry = global_widgets[f"ety_row_height_cover_{i}"]
         lbl_row_height.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_row_height.grid(row=0, column=column_index, padx=(3, 2))
@@ -421,15 +467,15 @@ def fr_product(fr_product_bottom_2):
     for i in list:
         lbl_column_width = Label(fr_2, text=f"{i}:")
         ety_column_width = Entry(fr_2, width=6, justify=RIGHT)
-        _widgets[f"lbl_column_width_product_{i}"] = lbl_column_width
-        _widgets[f"ety_column_width_product_{i}"] = ety_column_width
+        global_widgets[f"lbl_column_width_product_{i}"] = lbl_column_width
+        global_widgets[f"ety_column_width_product_{i}"] = ety_column_width
 
     column_index = 0
-    lbl_column_width_title.grid(row=0, column=column_index, sticky=E)
+    lbl_column_width_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for v in list:
-        lbl_column_width: Label = _widgets[f"lbl_column_width_product_{v}"]
-        ety_column_width: Entry = _widgets[f"ety_column_width_product_{v}"]
+        lbl_column_width: Label = global_widgets[f"lbl_column_width_product_{v}"]
+        ety_column_width: Entry = global_widgets[f"ety_column_width_product_{v}"]
         lbl_column_width.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_column_width.grid(row=0, column=column_index, padx=(0, 10))
@@ -443,15 +489,15 @@ def fr_product(fr_product_bottom_2):
     for i, v in enumerate(list):
         lbl_row_height = Label(fr_3, text=f"{v}:")
         ety_row_height = Entry(fr_3, width=3, justify=RIGHT)
-        _widgets[f"lbl_row_height_product_{i}"] = lbl_row_height
-        _widgets[f"ety_row_height_product_{i}"] = ety_row_height
+        global_widgets[f"lbl_row_height_product_{i}"] = lbl_row_height
+        global_widgets[f"ety_row_height_product_{i}"] = ety_row_height
 
     column_index = 0
-    lbl_row_height_title.grid(row=0, column=column_index, sticky=E)
+    lbl_row_height_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for i, v in enumerate(list):
-        lbl_row_height: Label = _widgets[f"lbl_row_height_product_{i}"]
-        ety_row_height: Entry = _widgets[f"ety_row_height_product_{i}"]
+        lbl_row_height: Label = global_widgets[f"lbl_row_height_product_{i}"]
+        ety_row_height: Entry = global_widgets[f"ety_row_height_product_{i}"]
         lbl_row_height.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_row_height.grid(row=0, column=column_index, padx=(3, 2))
@@ -476,7 +522,7 @@ def fr_log(fr_product_bottom_3):
     fr_1.pack(side=TOP, fill=X)
     fr_2.pack(fill=BOTH, expand=True)
 
-    _widgets["txt_product_log"] = txt_product_log
+    global_widgets["txt_product_log"] = txt_product_log
     pass
 
 
@@ -510,12 +556,12 @@ def fr_bottom(fr_product_bottom: Frame):
 
 
 def init_fr_product():
-    fr_product: Frame = _widgets["fr_product"]
+    fr_product: Frame = global_widgets["fr_product"]
     fr_product_top = Frame(fr_product)
     fr_product_top_1 = Frame(fr_product)
     fr_product_bottom = Frame(fr_product)
-    _widgets["fr_product_top"] = fr_product_top
-    _widgets["fr_product_bottom"] = fr_product_bottom
+    global_widgets["fr_product_top"] = fr_product_top
+    global_widgets["fr_product_bottom"] = fr_product_bottom
 
     fr_product_top.pack(side=TOP, fill=X)
     fr_product_top_1.pack(side=TOP, fill=X)

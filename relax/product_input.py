@@ -1,4 +1,4 @@
-from pandas import read_excel
+from pandas import read_excel, DataFrame
 
 
 def get_multindex_columns(column_name: str, sep_1, sep_2):
@@ -71,4 +71,13 @@ def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
     # 订单已撤销:报账单编号为空
     df.dropna(subset=["K"], inplace=True)
     df.loc[:, "B"] = df["B"].apply(datetime_to_date)
+    return df
+
+
+def get_all_base(base_file_path: str) -> DataFrame:
+    df = read_excel(
+        base_file_path,
+        usecols=["商品名称", "税率", "免税", "税收编码"],
+        dtype={"税收编码": str, "税率": str},
+    )
     return df
