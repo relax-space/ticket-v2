@@ -6,9 +6,20 @@ def json_template_input(current_data: dict):
     import_list = current_data["product"]["output"]["import_list"]
     import_list["enable"] = global_dict_chk_var["_import_var"].get()
     import_list["path"] = global_widgets["ety_import"].get()
-    import_list["default_value"] = global_dict_chk_var["_import_var_option"].get()
+    v = global_dict_chk_var["_import_var_option"].get()
+    import_list["default_value"] = v
+
+    current_import = import_list[v]
+    current_import["sale_name"] = global_widgets["ety_sale_name"].get()
+    current_import["sale_account"] = global_widgets["ety_sale_account"].get()
+    current_import["exclude_zd"] = global_widgets["ety_exclude_zd"].get()
+    header_max = global_widgets["ety_header_max"].get()
+    detail_max = global_widgets["ety_detail_max"].get()
+    current_import["header_max"] = int(header_max) if header_max else ""
+    current_import["detail_max"] = int(detail_max) if detail_max else ""
 
     product_input = current_data["product"]["input"]
+    product_input["product_path"] = global_widgets["ety_product_input"].get()
     stamp = product_input["stamp"]
     stamp["enable"] = global_dict_chk_var["_stamp_var"].get()
     stamp["path"] = global_widgets["ety_stamp"].get()
@@ -131,6 +142,12 @@ def json_template_output_product(current_data: dict):
 def render_input(current_data: dict):
     ety_product_input: Entry = global_widgets["ety_product_input"]
     ety_import: Entry = global_widgets["ety_import"]
+    ety_sale_name: Entry = global_widgets["ety_sale_name"]
+    ety_sale_account: Entry = global_widgets["ety_sale_account"]
+    ety_exclude_zd: Entry = global_widgets["ety_exclude_zd"]
+    ety_header_max: Entry = global_widgets["ety_header_max"]
+    ety_detail_max: Entry = global_widgets["ety_detail_max"]
+
     ety_stamp: Entry = global_widgets["ety_stamp"]
     ety_X_stamp_scale_cover: Entry = global_widgets["ety_X_stamp_scale_cover"]
     ety_Y_stamp_scale_cover: Entry = global_widgets["ety_Y_stamp_scale_cover"]
@@ -142,7 +159,29 @@ def render_input(current_data: dict):
     global_dict_chk_var["_import_var"].set(import_list["enable"])
     ety_import.delete(0, END)
     ety_import.insert(END, import_list["path"])
-    global_dict_chk_var["_import_var_option"].set(import_list["default_value"])
+    v = import_list["default_value"]
+    global_dict_chk_var["_import_var_option"].set(v)
+    current_import = import_list[v]
+    sale_name = current_import.get("sale_name")
+    sale_account = current_import.get("sale_account")
+    exclude_zd = current_import.get("exclude_zd")
+    header_max = current_import.get("header_max")
+    detail_max = current_import.get("detail_max")
+    if sale_name:
+        ety_sale_name.delete(0, END)
+        ety_sale_name.insert(END, sale_name)
+    if sale_account:
+        ety_sale_account.delete(0, END)
+        ety_sale_account.insert(END, sale_account)
+    if exclude_zd:
+        ety_exclude_zd.delete(0, END)
+        ety_exclude_zd.insert(END, exclude_zd)
+    if header_max:
+        ety_header_max.delete(0, END)
+        ety_header_max.insert(END, header_max)
+    if detail_max:
+        ety_detail_max.delete(0, END)
+        ety_detail_max.insert(END, detail_max)
 
     product_input = current_data["product"]["input"]
     ety_product_input.delete(0, END)

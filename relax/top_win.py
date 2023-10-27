@@ -12,7 +12,6 @@ from tkinter import (
     filedialog,
     messagebox,
 )
-from relax.product_win_data import json_product_data
 from relax.util import (
     get_current_data,
     update_raw_data,
@@ -74,7 +73,7 @@ def init_fr_top():
     lbl_supplier_name = Label(fr_top, text="供应商名称：*", fg="red")
     ety_supplier_name = Entry(fr_top, width=60)
 
-    lbl_output_path = Label(fr_top, text="输出文件夹路径：*", fg="red")
+    lbl_output_path = Label(fr_top, text="输出文件夹路径：")
     ety_output_path = Entry(fr_top, width=60)
     btn_output_path = Button(fr_top, text="选择", command=set_output_folder)
 
@@ -90,7 +89,7 @@ def init_fr_top():
     btn_master_edit.grid(row=row_index, column=0)
 
     row_index += 1
-    lbl_supplier_name.grid(row=row_index, column=0, pady=(10, 0), sticky=E)
+    lbl_supplier_name.grid(row=row_index, column=0, pady=(3, 0), sticky=E)
     ety_supplier_name.grid(row=row_index, column=1)
 
     row_index += 1

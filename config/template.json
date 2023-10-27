@@ -2,10 +2,10 @@
     "checked": false,
     "menu_name": "食安",
     "supplier_name": "",
-    "output_path": "data",
+    "output_path": "",
     "batch_size": {
         "enable": true,
-        "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
+        "column_name": "客户id,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
         "path": "",
         "page_height_A4": 830,
         "page_height_A5": 380
@@ -277,7 +277,7 @@
             "import_list": {
                 "enable": true,
                 "path": "",
-                "default_value": "诺诺",
+                "default_value": "电子税务局（批量）",
                 "诺诺": {
                     "row1_content": [
                         "注意：\n1、【金额是否含税】以导入时页面左上角设置为准    \n2、【是否清单票】以导入时页面左上角设置为准",
@@ -350,9 +350,35 @@
                         "折扣金额",
                         "优惠政策类型"
                     ]
+                },
+                "电子税务局（批量）": {
+                    "sheet_names": "1-发票基本信息,2-发票明细信息,3-特定业务信息,4-附加要素信息",
+                    "sale_name": "",
+                    "sale_account": "",
+                    "exclude_zd": "",
+                    "header_max": 100,
+                    "detail_max": 5000
                 }
             }
         }
     },
-    "ticket": {}
+    "ticket": {
+        "mapping": {
+            "ticket_path": "",
+            "mapping_path": "",
+            "column_name": "数电票号码,销方名称,开票日期,备注",
+            "column_sep": ",",
+            "date_format": "%Y-%m-%d %H:%M:%S",
+            "sheet_name": "发票基础信息",
+            "regax_pre": "",
+            "regax_post": "灶点",
+            "exclude_zd": ""
+        },
+        "margin": {
+            "left": 5,
+            "right": 5,
+            "top": 5,
+            "bottom": 10
+        }
+    }
 }

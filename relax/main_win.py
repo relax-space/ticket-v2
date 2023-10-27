@@ -10,7 +10,7 @@ from tkinter import (
     StringVar,
     Tk,
 )
-from tkinter.ttk import Combobox, Notebook
+from tkinter.ttk import Notebook
 from relax.menu_win_data import render_menu_data
 from relax.product_win import init_fr_product
 from relax.product_win_data import render_product_data

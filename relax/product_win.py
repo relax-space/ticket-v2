@@ -1,23 +1,29 @@
 """
 商品清单
 """
-import time
+from shutil import rmtree
 from tkinter.font import Font
 
 from pandas import DataFrame
-from relax.excel_common import get_page_size_list
+from relax.product_print import make_product_file
 from relax.product_cover import write_all_cover
 from relax.product_detail import write_all_product
 from relax.product_import import make_import_file
-from relax.product_input import get_all_base, read_one_product, read_all_product
-from relax.product_print import make_product_file
+from relax.read_excel_file import (
+    get_all_tax,
+    read_one_product,
+    read_all_product,
+    get_page_size_list,
+)
 from relax.util import (
     fill_zero_2,
     get_current_data,
+    get_runtime,
     global_widgets,
     global_dict_chk_var,
+    global_config_data,
 )
-from os import path as os_path, makedirs
+from os import path as os_path, makedirs, startfile as os_startfile
 from traceback import format_exc
 from tkinter import (
     BOTH,
@@ -44,6 +50,7 @@ from tkinter import (
 )
 
 from relax.win_data import json_data
+from time import time
 
 
 def path_click():
@@ -61,7 +68,7 @@ def path_click():
     pass
 
 
-def create_click_raw():
+def create_click_valid():
     lst_menu: Listbox = global_widgets["lst_menu"]
     ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
     ety_output_path: Entry = global_widgets["ety_output_path"]
@@ -76,73 +83,120 @@ def create_click_raw():
     ety_X_stamp_scale_product: Entry = global_widgets["ety_X_stamp_scale_product"]
     ety_Y_stamp_scale_product: Entry = global_widgets["ety_Y_stamp_scale_product"]
 
-    def create_click_valid():
-        if not lst_menu.curselection():
-            messagebox.showwarning("警告", "请先在左边选择一个模板")
-            return False
+    ety_sale_name: Entry = global_widgets["ety_sale_name"]
+    ety_sale_account: Entry = global_widgets["ety_sale_account"]
+    ety_header_max: Entry = global_widgets["ety_header_max"]
+    ety_detail_max: Entry = global_widgets["ety_detail_max"]
 
-        if not ety_supplier_name.get():
-            messagebox.showwarning("警告", "供应商不能为空！")
-            ety_supplier_name.focus_set()
-            return False
-        if not ety_output_path.get():
-            messagebox.showwarning("警告", "输出文件夹路径不能为空！")
-            ety_output_path.focus_set()
-            return False
-        if not ety_product_input.get():
-            messagebox.showwarning("警告", "商品文件路径不能为空！")
-            ety_product_input.focus_set()
-            return False
+    if not lst_menu.curselection():
+        messagebox.showwarning("警告", "请先在左边选择一个模板")
+        return False
+    elif not ety_supplier_name.get():
+        messagebox.showwarning("警告", "供应商不能为空！")
+        ety_supplier_name.focus_set()
+        return False
+    elif not ety_output_path.get():
+        messagebox.showwarning("警告", "输出文件夹路径不能为空！")
+        ety_output_path.focus_set()
+        return False
+    elif not ety_product_input.get():
+        messagebox.showwarning("警告", "商品文件路径不能为空！")
+        ety_product_input.focus_set()
+        return False
 
-        if global_dict_chk_var["_import_var"] and not ety_import.get():
+    elif global_dict_chk_var["_import_var"].get():
+        if not ety_import.get():
             messagebox.showwarning("警告", "税率表不能为空！")
             ety_import.focus_set()
             return False
-        if global_dict_chk_var["_page_size_var"]:
-            if not ety_page_size.get():
-                messagebox.showwarning("警告", "尺寸表不能为空！")
-                ety_page_size.focus_set()
-                return False
-            if not ety_A4_page_height.get():
-                messagebox.showwarning("警告", "A4不能为空！")
-                ety_A4_page_height.focus_set()
-                return False
-            if not ety_A5_page_height.get():
-                messagebox.showwarning("警告", "A5不能为空！")
-                ety_A5_page_height.focus_set()
-                return False
-        if global_dict_chk_var["_stamp_var"]:
-            if not ety_stamp.get():
-                messagebox.showwarning("警告", "印章路径不能为空！")
-                ety_stamp.focus_set()
-                return False
-            if not ety_X_stamp_scale_cover.get():
-                messagebox.showwarning("警告", "宽度缩放不能为空！")
-                ety_X_stamp_scale_cover.focus_set()
-                return False
-            if not ety_Y_stamp_scale_cover.get():
-                messagebox.showwarning("警告", "高度缩放不能为空！")
-                ety_Y_stamp_scale_cover.focus_set()
-                return False
-            if not ety_X_stamp_scale_product.get():
-                messagebox.showwarning("警告", "宽度缩放不能为空！")
-                ety_X_stamp_scale_product.focus_set()
-                return False
-            if not ety_Y_stamp_scale_product.get():
-                messagebox.showwarning("警告", "高度缩放不能为空！")
+        if global_dict_chk_var["_import_var_option"].get() == "电子税务局（批量）":
+            if not global_dict_chk_var["_page_size_var"].get():
+                messagebox.showwarning("警告", "当选择电子税务局（批量）时，必须勾选：是否批量设置页面尺寸！")
                 ety_Y_stamp_scale_product.focus_set()
                 return False
-        return True
+            elif not ety_sale_name.get():
+                messagebox.showwarning("警告", "销售方开户行，不能为空！")
+                ety_sale_name.focus_set()
+                return False
+            elif not ety_sale_account.get():
+                messagebox.showwarning("警告", "销售方银行账号，不能为空！")
+                ety_sale_account.focus_set()
+                return False
+            elif not ety_header_max.get():
+                messagebox.showwarning("警告", "发票最大行数，不能为空！")
+                ety_header_max.focus_set()
+                return False
+            elif not ety_detail_max.get():
+                messagebox.showwarning("警告", "明细最大行数，不能为空！")
+                ety_detail_max.focus_set()
+                return False
+            else:
+                max_header_count = int(ety_header_max.get())
+                max_detail_count = int(ety_detail_max.get())
+                if max_header_count > 100:
+                    messagebox.showwarning("警告", "明细最大行数，不能超过100！")
+                    ety_detail_max.focus_set()
+                    return False
+                elif max_detail_count > 5000:
+                    messagebox.showwarning("警告", "明细最大行数，不能超过5000！")
+                    ety_detail_max.focus_set()
+                    return False
+
+    elif global_dict_chk_var["_page_size_var"].get():
+        if not ety_page_size.get():
+            messagebox.showwarning("警告", "尺寸表不能为空！")
+            ety_page_size.focus_set()
+            return False
+        elif not ety_A4_page_height.get():
+            messagebox.showwarning("警告", "A4不能为空！")
+            ety_A4_page_height.focus_set()
+            return False
+        elif not ety_A5_page_height.get():
+            messagebox.showwarning("警告", "A5不能为空！")
+            ety_A5_page_height.focus_set()
+            return False
+    elif global_dict_chk_var["_stamp_var"].get():
+        if not ety_stamp.get():
+            messagebox.showwarning("警告", "印章路径不能为空！")
+            ety_stamp.focus_set()
+            return False
+        elif not ety_X_stamp_scale_cover.get():
+            messagebox.showwarning("警告", "宽度缩放不能为空！")
+            ety_X_stamp_scale_cover.focus_set()
+            return False
+        elif not ety_Y_stamp_scale_cover.get():
+            messagebox.showwarning("警告", "高度缩放不能为空！")
+            ety_Y_stamp_scale_cover.focus_set()
+            return False
+        elif not ety_X_stamp_scale_product.get():
+            messagebox.showwarning("警告", "宽度缩放不能为空！")
+            ety_X_stamp_scale_product.focus_set()
+            return False
+        elif not ety_Y_stamp_scale_product.get():
+            messagebox.showwarning("警告", "高度缩放不能为空！")
+            ety_Y_stamp_scale_product.focus_set()
+            return False
+
+    return True
+
+
+def create_click_raw(only_zd_list: list):
+    t1 = time()
 
     if not create_click_valid():
         return
+
+    lst_menu: Listbox = global_widgets["lst_menu"]
+    ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
+
     key = lst_menu.get(lst_menu.curselection()[0])
     current_data = get_current_data(key)
     json_data(current_data)
 
-    column_name_1 = current_data["product"]["input"]["column_name_1"]
-    column_sep_1: str = current_data["product"]["input"]["column_sep_1"]
-    product_path = ety_product_input.get()
+    product_input = current_data["product"]["input"]
+    column_name_1 = product_input["column_name_1"]
+    column_sep_1: str = product_input["column_sep_1"]
+    product_path = product_input["product_path"]
     year, month, suppier, bill_date = read_one_product(
         product_path, column_name_1, column_sep_1
     )
@@ -158,11 +212,8 @@ def create_click_raw():
             "警告",
             "供应商名字不一致：文件中和界面上的供应商名字不一致，请确认!",
         )
+        ety_supplier_name.focus()
         return
-
-    usecols_str: str = current_data["product"]["input"]["column_name"]
-    column_sep_2: str = current_data["product"]["input"]["column_sep_2"]
-    df = read_all_product(product_path, usecols_str, column_sep_1, column_sep_2)
 
     output_folder_path = os_path.join(
         current_data["output_path"], suppier, f"{year}{fill_zero_2(month)}"
@@ -170,27 +221,47 @@ def create_click_raw():
     if not os_path.isdir(output_folder_path):
         makedirs(output_folder_path)
     batch_size = current_data["batch_size"]
-    zd_set, product_size_dict, ticket_size_dict = get_page_size_list(batch_size)
+    zd_set, product_size_dict, ticket_size_dict = get_page_size_list(
+        batch_size, year, month
+    )
+    usecols_str: str = current_data["product"]["input"]["column_name"]
+    column_sep_2: str = current_data["product"]["input"]["column_sep_2"]
+    df = read_all_product(product_path, usecols_str, column_sep_1, column_sep_2)
+    if only_zd_list:
+        df = df[df["C"].isin(only_zd_list)]
     df_set = set(df["C"].values)
-    if product_size_dict:
+    if zd_set:
         zd_difference = df_set.difference(zd_set)
         if zd_difference:
-            messagebox.showwarning("警告", f"尺寸表缺少灶点号：{zd_difference}")
+            messagebox.showwarning("警告", f"尺寸表缺少灶点号或者遗漏了必要的信息：{zd_difference}")
             return
-    is_import = global_dict_chk_var["_import_var"]
-    df_bases = DataFrame()
+
+        def remove_unuse(unuse_set: set, size_dict):
+            for i in unuse_set:
+                del size_dict[i]
+            pass
+
+        unuse_set = zd_set.difference(df_set)
+        remove_unuse(unuse_set, product_size_dict)
+        remove_unuse(unuse_set, ticket_size_dict)
+
+    df_key_list = sorted(df_set)
+    is_import = global_dict_chk_var["_import_var"].get()
+    df_taxs = DataFrame()
     if is_import:
         base_file_path = current_data["product"]["output"]["import_list"]["path"]
-        df_bases = get_all_base(base_file_path)
-        df_set_tax = set(df_bases["商品名称"].values)
+        df_taxs = get_all_tax(base_file_path)
+        df_set_tax = set(df_taxs["A"].values)
         df_set_raw_product = set(df["E"].values)
         zd_difference = df_set_raw_product.difference(df_set_tax)
         if zd_difference:
             messagebox.showwarning("警告", f"税率表缺少商品：{zd_difference}")
             return
         pass
+    t2 = time()
+
     write_all_product(
-        df_set,
+        df_key_list,
         df,
         year,
         month,
@@ -200,9 +271,10 @@ def create_click_raw():
         output_folder_path,
         product_size_dict,
     )
+    t3 = time()
 
     write_all_cover(
-        df_set,
+        df_key_list,
         df,
         year,
         month,
@@ -211,18 +283,75 @@ def create_click_raw():
         output_folder_path,
         product_size_dict,
     )
-    if product_size_dict:
-        make_product_file(product_size_dict, output_folder_path)
-
+    t4 = time()
+    make_product_file(product_size_dict, output_folder_path)
+    t5 = time()
+    detail_count_over = []
     if is_import:
-        make_import_file(current_data, output_folder_path, df_bases)
+        detail_count_over = make_import_file(
+            current_data,
+            output_folder_path,
+            df_taxs,
+            df_key_list,
+            product_size_dict,
+            df,
+            year,
+            month,
+        )
+    t6 = time()
+    print(
+        get_runtime(t1, t2),
+        get_runtime(t2, t3),
+        get_runtime(t3, t4),
+        get_runtime(t4, t5),
+        get_runtime(t5, t6),
+    )
+    cover_source_path = os_path.join(
+        output_folder_path, global_config_data["temp_cover"]
+    )
+    product_source_path = os_path.join(
+        output_folder_path, global_config_data["temp_product"]
+    )
+    if os_path.isdir(cover_source_path):
+        rmtree(cover_source_path)
+    if os_path.isdir(product_source_path):
+        rmtree(product_source_path)
+    if detail_count_over:
+        ety_detail_max = global_widgets["ety_detail_max"]
+        max_detail_count = int(ety_detail_max.get())
+        messagebox.showwarning(
+            "批量导入提示",
+            f"批量导入提示：以下灶点明细超过最大条数({max_detail_count})，请单独导入：{detail_count_over}",
+        )
+    else:
+        result = messagebox.askquestion("提示", "成功，你需要打开文件夹吗？")
+        if result == "yes":
+            os_startfile(output_folder_path)
 
 
 def create_click():
     try:
-        create_click_raw()
+        create_click_raw([])
     except Exception as e:
         messagebox.showerror("错误", format_exc())
+
+
+def single_create():
+    try:
+        ety_zd_input: Entry = global_widgets["ety_zd_input"]
+        zd_input_str = ety_zd_input.get()
+        if not zd_input_str:
+            messagebox.showwarning("警告", "灶点号不能为空！")
+            ety_zd_input.focus_set()
+            return
+        if not create_click_valid():
+            return
+        zd_input_str = zd_input_str.replace("，", ",")
+        only_zd_list: list = zd_input_str.split(",")
+        create_click_raw(only_zd_list)
+    except Exception as e:
+        messagebox.showerror("错误", format_exc())
+        pass
 
 
 def import_click():
@@ -253,6 +382,98 @@ def stamp_click():
     pass
 
 
+def fill_fr_import_option(fr_import_option):
+    def rdo_click_1():
+        fr_batch_info: Frame = global_widgets["fr_batch_info"]
+        fr_batch_info.grid(row=4, padx=(55, 0), column=0, columnspan=2)
+        pass
+
+    def rdo_click_2():
+        fr_batch_info: Frame = global_widgets["fr_batch_info"]
+        if fr_batch_info.winfo_viewable():
+            fr_batch_info.grid_forget()
+        pass
+
+    lbl_import_option = Label(fr_import_option, text="导入模板：")
+    rdo_import_option_1 = Radiobutton(
+        fr_import_option,
+        text="电子税务局（批量）",
+        value="电子税务局（批量）",
+        variable=global_dict_chk_var["_import_var_option"],
+        command=rdo_click_1,
+    )
+    rdo_import_option_2 = Radiobutton(
+        fr_import_option,
+        text="电子税务局",
+        value="电子税务局",
+        variable=global_dict_chk_var["_import_var_option"],
+        command=rdo_click_2,
+    )
+    rdo_import_option_3 = Radiobutton(
+        fr_import_option,
+        text="诺诺",
+        value="诺诺",
+        variable=global_dict_chk_var["_import_var_option"],
+        command=rdo_click_2,
+    )
+    lbl_import_option.grid(row=0, column=0, sticky=E)
+    rdo_import_option_1.grid(row=0, column=1)
+    rdo_import_option_2.grid(row=0, column=2, padx=(20, 0))
+    rdo_import_option_3.grid(row=0, column=3, padx=(20, 0))
+
+
+def fill_fr_batch_info(fr_batch_info):
+    lbl_sale_name = Label(fr_batch_info, text="销售方开户行：")
+    ety_sale_name = Entry(fr_batch_info, width=60)
+    lbl_sale_account = Label(fr_batch_info, text="销售方银行账号：")
+    ety_sale_account = Entry(fr_batch_info, width=60)
+
+    fr_0 = Frame(fr_batch_info)
+    lbl_sale = Label(fr_0, text="销售方：")
+    lbl_sale_name = Label(fr_0, text="开户行：")
+    ety_sale_name = Entry(fr_0, width=20)
+    lbl_sale_account = Label(fr_0, text="银行账号：")
+    ety_sale_account = Entry(fr_0, width=21)
+    lbl_sale.grid(row=0, column=0, sticky=E)
+    lbl_sale_name.grid(row=0, column=1)
+    ety_sale_name.grid(row=0, column=2)
+    lbl_sale_account.grid(row=0, column=3, padx=(10, 0))
+    ety_sale_account.grid(row=0, column=4)
+
+    lbl_exclude_zd = Label(fr_batch_info, text="排除灶点号：")
+    ety_exclude_zd = Entry(fr_batch_info, width=60)
+
+    fr_1 = Frame(fr_batch_info)
+    lbl_total = Label(fr_1, text="行数限制：")
+    lbl_header_max = Label(fr_1, text="发票最大行数：")
+    ety_header_max = Entry(fr_1, width=10, justify=RIGHT)
+    lbl_detail_max = Label(fr_1, text="明细最大行数：")
+    ety_detail_max = Entry(fr_1, width=10, justify=RIGHT)
+    lbl_total.grid(row=0, column=0, sticky=E)
+    lbl_header_max.grid(row=0, column=1)
+    ety_header_max.grid(row=0, column=2)
+    lbl_detail_max.grid(row=0, column=3, padx=(10, 0))
+    ety_detail_max.grid(row=0, column=4)
+
+    row_index = 0
+    fr_0.grid(row=row_index, column=0, columnspan=2, padx=(47, 0), sticky=W)
+
+    row_index += 1
+    lbl_exclude_zd.grid(row=row_index, column=0, padx=(23, 0), sticky=E)
+    ety_exclude_zd.grid(row=row_index, column=1)
+
+    row_index += 1
+    fr_1.grid(row=row_index, column=0, columnspan=2, padx=(36, 0), sticky=W)
+
+    global_widgets["ety_sale_name"] = ety_sale_name
+    global_widgets["ety_sale_account"] = ety_sale_account
+    global_widgets["ety_exclude_zd"] = ety_exclude_zd
+    global_widgets["ety_header_max"] = ety_header_max
+    global_widgets["ety_detail_max"] = ety_detail_max
+
+    pass
+
+
 def fr_top(fr_product_top, fr_product_top_1):
     lbl_product_input = Label(fr_product_top, text="商品文件路径：*", fg="red")
     ety_product_input = Entry(fr_product_top, width=60)
@@ -270,30 +491,19 @@ def fr_top(fr_product_top, fr_product_top_1):
         fr_product_top, text="是否批量生成导入列表：", variable=global_dict_chk_var["_import_var"]
     )
     lbl_remark_1 = Label(fr_product_top, text="(如果不勾选，下面的设置不会生效)")
+
+    fr_import_option = Frame(fr_product_top)
+    fill_fr_import_option(fr_import_option)
+
     lbl_import = Label(fr_product_top, text="税率表：")
     ety_import = Entry(fr_product_top, width=60)
     btn_import = Button(fr_product_top, text="选择", command=import_click)
 
-    fr_import_option = Frame(fr_product_top)
-    lbl_import_option = Label(fr_import_option, text="导入模板：")
-    rdo_import_option_1 = Radiobutton(
-        fr_import_option,
-        text="诺诺",
-        value="诺诺",
-        variable=global_dict_chk_var["_import_var_option"],
-    )
-    rdo_import_option_2 = Radiobutton(
-        fr_import_option,
-        text="电子税务局",
-        value="电子税务局",
-        variable=global_dict_chk_var["_import_var_option"],
-    )
-    lbl_import_option.grid(row=0, column=0, sticky=E)
-    rdo_import_option_1.grid(row=0, column=1)
-    rdo_import_option_2.grid(row=0, column=2, padx=(20, 0))
+    fr_batch_info = Frame(fr_product_top)
+    fill_fr_batch_info(fr_batch_info)
 
     chk_stamp = Checkbutton(
-        fr_product_top, text="是否盖章：", variable=global_dict_chk_var["_stamp_var"]
+        fr_product_top, text="是否批量加盖电子印章：", variable=global_dict_chk_var["_stamp_var"]
     )
     lbl_remark_3 = Label(fr_product_top, text="(如果不勾选，下面的设置不会生效)")
     lbl_stamp = Label(fr_product_top, text="印章路径：")
@@ -301,9 +511,9 @@ def fr_top(fr_product_top, fr_product_top_1):
     btn_stamp = Button(fr_product_top, text="选择", command=stamp_click)
 
     row_index = 0
-    lbl_product_input.grid(row=row_index, column=0, sticky=E, pady=(10, 3))
-    ety_product_input.grid(row=row_index, column=1, pady=(10, 3), columnspan=4)
-    btn_product_input.grid(row=row_index, column=5, pady=(10, 3))
+    lbl_product_input.grid(row=row_index, column=0, sticky=E, pady=(3, 3))
+    ety_product_input.grid(row=row_index, column=1, pady=(3, 3))
+    btn_product_input.grid(row=row_index, column=5, pady=(3, 3))
 
     btn_product_create.grid(
         row=row_index,
@@ -316,27 +526,30 @@ def fr_top(fr_product_top, fr_product_top_1):
 
     # row_index += 1
     # lbl_product_output.grid(row=row_index, column=0, sticky=E, pady=(0, 3))
-    # ety_product_output.grid(row=row_index, column=1, pady=(0, 3), columnspan=4)
+    # ety_product_output.grid(row=row_index, column=1, pady=(0, 3))
     # btn_product_output.grid(row=row_index, column=5, pady=(0, 3))
 
     row_index += 1
     chk_import.grid(row=row_index, column=0, pady=(0, 3), sticky=E)
-    lbl_remark_1.grid(row=row_index, column=1, sticky="w", columnspan=4)
+    lbl_remark_1.grid(row=row_index, column=1, sticky="w")
+
+    row_index += 1
+    fr_import_option.grid(row=row_index, column=0, columnspan=2)
 
     row_index += 1
     lbl_import.grid(row=row_index, column=0, sticky=E, pady=(0, 3))
-    ety_import.grid(row=row_index, column=1, pady=(0, 3), columnspan=4)
+    ety_import.grid(row=row_index, column=1, pady=(0, 3))
     btn_import.grid(row=row_index, column=5, pady=(0, 3))
 
     row_index += 1
-    fr_import_option.grid(row=row_index, padx=(94, 0), column=0, columnspan=2)
+    fr_batch_info.grid(row=row_index, padx=(58, 0), column=0, columnspan=2, sticky=W)
 
     row_index += 1
     chk_stamp.grid(row=row_index, column=0, pady=(0, 3), sticky=E)
-    lbl_remark_3.grid(row=row_index, column=1, sticky="w", columnspan=4)
+    lbl_remark_3.grid(row=row_index, column=1, sticky="w")
     row_index += 1
     lbl_stamp.grid(row=row_index, column=0, sticky=E, pady=(0, 3))
-    ety_stamp.grid(row=row_index, column=1, pady=(0, 3), columnspan=4)
+    ety_stamp.grid(row=row_index, column=1, pady=(0, 3))
     btn_stamp.grid(row=row_index, column=5, pady=(0, 3))
 
     global_widgets["ety_product_input"] = ety_product_input
@@ -364,7 +577,7 @@ def fr_top(fr_product_top, fr_product_top_1):
 
     row_index = 0
     lbl_stamp_scale_cover.grid(
-        row=row_index, column=0, padx=(94, 0), pady=(3, 0), sticky=E
+        row=row_index, padx=(94, 0), column=0, pady=(3, 0), sticky=E
     )
     lbl_X_stamp_scale_cover.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
     ety_X_stamp_scale_cover.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
@@ -375,7 +588,7 @@ def fr_top(fr_product_top, fr_product_top_1):
 
     row_index += 1
     lbl_stamp_scale_product.grid(
-        row=row_index, column=0, padx=(94, 0), pady=(3, 0), sticky=E
+        row=row_index, padx=(94, 0), column=0, pady=(3, 0), sticky=E
     )
     lbl_X_stamp_scale_product.grid(row=row_index, column=1, pady=(3, 0), sticky=W)
     ety_X_stamp_scale_product.grid(row=row_index, column=2, pady=(3, 0), sticky=W)
@@ -389,6 +602,7 @@ def fr_top(fr_product_top, fr_product_top_1):
 
     global_widgets["ety_X_stamp_scale_product"] = ety_X_stamp_scale_product
     global_widgets["ety_Y_stamp_scale_product"] = ety_Y_stamp_scale_product
+    global_widgets["fr_batch_info"] = fr_batch_info
 
     pass
 
@@ -461,7 +675,6 @@ def fr_product(fr_product_bottom_2):
 
     fr_2 = Frame(fr_product_bottom_2)
     lbl_column_width_title = Label(fr_2, text=f"列宽：")
-    lbl_column_width_title.pack(side=TOP)
 
     list = ("A", "B", "C", "D", "E", "F", "G", "H")
     for i in list:
@@ -507,6 +720,29 @@ def fr_product(fr_product_bottom_2):
     pass
 
 
+def fr_special_zd(fr_product_bottom_3: Frame):
+    fr_1 = Frame(fr_product_bottom_3, height=25)
+
+    lbl_1 = Label(fr_1, text="生成 - 个别灶点")
+    font: dict[str, any] = Font(font=lbl_1["font"]).actual()
+    lbl_1.configure(font=(font["family"], 10, "bold"))
+    lbl_1.pack(side=TOP)
+    fr_1.pack(side=TOP, anchor=NW)
+
+    fr_2 = Frame(fr_product_bottom_3)
+    fr_2.pack(side=TOP, anchor=NW)
+    lbl_zd_title = Label(fr_2, text=f"灶点号：")
+    ety_zd_input = Entry(fr_2, width=60)
+    btn_zd_input = Button(fr_2, text="个别生成", command=single_create)
+
+    row_index = 0
+    lbl_zd_title.grid(row=row_index, column=0, padx=(20, 0), sticky=E)
+    ety_zd_input.grid(row=row_index, column=1)
+    btn_zd_input.grid(row=row_index, column=2)
+    global_widgets["ety_zd_input"] = ety_zd_input
+    pass
+
+
 def fr_log(fr_product_bottom_3):
     fr_1 = Frame(fr_product_bottom_3, height=20)
     fr_2 = Frame(fr_product_bottom_3)
@@ -532,25 +768,16 @@ def fr_bottom(fr_product_bottom: Frame):
 
     fr_product_bottom_1 = Frame(fr_product_bottom, height=80)
     fr_product_bottom_1.pack(side=TOP, anchor=NW)
-    # fr_product_bottom_1.pack_propagate(0)
-
-    # fr_input_sep_2 = Frame(fr_product_bottom, width=2, borderwidth=1, relief="groove")
-    # fr_input_sep_2.pack(side=LEFT, fill=Y, padx=3, pady=2)
 
     fr_product_bottom_2 = Frame(fr_product_bottom, height=80)
     fr_product_bottom_2.pack(side=TOP, anchor=NW)
-    # fr_product_bottom_2.pack_propagate(0)
 
-    # fr_input_sep_3 = Frame(fr_product_bottom, width=2, borderwidth=1, relief="groove")
-    # fr_input_sep_3.pack(side=LEFT, fill=Y, padx=3, pady=2)
-
-    fr_product_bottom_3 = Frame(fr_product_bottom)
-    fr_product_bottom_3.pack(fill=BOTH, expand=True)
-    fr_product_bottom_3.pack_propagate(0)
+    fr_product_bottom_3 = Frame(fr_product_bottom, height=80)
+    fr_product_bottom_3.pack(side=TOP, anchor=NW)
 
     fr_cover(fr_product_bottom_1)
     fr_product(fr_product_bottom_2)
-    # fr_log(fr_product_bottom_3)
+    fr_special_zd(fr_product_bottom_3)
 
     pass
 

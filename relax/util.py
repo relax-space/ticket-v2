@@ -1,5 +1,6 @@
 from json import load as json_load, dump as json_dump
 from os import path as os_path
+from time import strftime, gmtime
 
 global_raw_data = []
 global_config_data = {}
@@ -70,9 +71,21 @@ def fill_zero_2(i: int) -> str:
     return f"{i:0>2}"
 
 
-def loop_name(base_path: str, name: str, postfix: str, seq_no: int) -> str:
+def get_unique_name(base_path: str, name: str, postfix: str, seq_no: int = 0) -> str:
     unique_name = f"{name}-{seq_no}" if seq_no else name
     if not os_path.isfile(os_path.join(base_path, f"{unique_name}{postfix}")):
-        return unique_name
+        return f"{unique_name}{postfix}"
     seq_no += 1
-    return loop_name(base_path, name, postfix, seq_no)
+    return get_unique_name(base_path, name, postfix, seq_no)
+
+
+def mm_to_pixel(mm: float):
+    # Notes how to calculate it:
+    # 1. Get the size of the paper in mm
+    # 2. Convert it to inches (25.4 millimeters are equal to 1 inches)
+    # 3. Convert it to pixels ad 72dpi (1 inch is equal to 72 pixels)
+    return int((72 / 25.4) * mm)
+
+
+def get_runtime(start_stamp, end_stamp):
+    return strftime("%H小时%M分%S秒", gmtime(end_stamp - start_stamp))

@@ -1,31 +1,12 @@
-from pandas import DataFrame, read_excel, isna
-from relax.product_input import get_all_base
+from pandas import DataFrame, isna
+from relax.batch_import_master import make_batch_import_elec
+from relax.read_excel_file import read_product
 from relax.util import global_dict_chk_var, global_config_data
 from os import listdir, path as os_path, makedirs
 
 
-def read_product(product_folder_path: str, columns: str):
-    df = read_excel(product_folder_path, header=3, dtype={"序号": str})
-    # 序号A,收货日期B,订单编号C,商品名称D,计量单位E,单价F,数量G,金额H
-    df.rename(
-        columns={
-            columns[0]: "A",
-            columns[1]: "B",
-            columns[2]: "C",
-            columns[3]: "D",
-            columns[4]: "E",
-            columns[5]: "F",
-            columns[6]: "G",
-            columns[7]: "H",
-        },
-        inplace=True,
-    )
-    return df
-
-
 def make_import_one_nuonuo(
-    df_bases,
-    set1,
+    df_taxs,
     source_path,
     target_path,
     file_name,
@@ -44,7 +25,7 @@ def make_import_one_nuonuo(
             continue
         new_row = []
         prod = row["D"].replace("\n", "")
-        df_base = df_bases.loc[df_bases["商品名称"] == prod]
+        df_tax = df_taxs.loc[df_taxs["A"] == prod]
         new_row.append(prod)
         new_row.append("")
         new_row.append(row["E"])
@@ -52,23 +33,18 @@ def make_import_one_nuonuo(
         new_row.append("")
         new_row.append(row["H"])
 
-        if df_base.empty:
-            set1.add(prod)
-            new_row.append("没有找到")
-            new_row.append("")
-            new_row.append("")
-        else:
-            new_row.append(df_base["税率"].fillna("0.0").values[0])
-            new_row.append(df_base["税收编码"].fillna("").values[0])
-            new_row.append(df_base["免税"].fillna("").values[0])
+        tax_percent = df_tax["B"].values[0]
+        is_tax_free = "" if tax_percent else "免税"
+        new_row.append(tax_percent)
+        new_row.append(df_tax["C"].values[0])
+        new_row.append(is_tax_free)
         rows.append(new_row)
     DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
     pass
 
 
 def make_import_one_elec(
-    df_bases,
-    set1,
+    df_taxs,
     source_path,
     target_path,
     file_name,
@@ -87,78 +63,97 @@ def make_import_one_elec(
             continue
         new_row = []
         prod = row["D"].replace("\n", "")
-        df_base = df_bases.loc[df_bases["商品名称"] == prod]
+        df_tax = df_taxs.loc[df_taxs["A"] == prod]
         new_row.append(prod)
-        if df_base.empty:
-            new_row.append("")
-        else:
-            new_row.append(df_base["税收编码"].fillna("").values[0])
+        tax_percent = df_tax["B"].values[0]
+        is_tax_free = "" if tax_percent else "免税"
+        new_row.append(tax_percent)
         new_row.append("")
         new_row.append(row["E"])
         new_row.append(row["G"])
         new_row.append("")
         new_row.append(row["H"])
 
-        if df_base.empty:
-            set1.add(prod)
-            new_row.append("没有找到")
-            new_row.append("")
-            new_row.append("")
-        else:
-            new_row.append(df_base["税率"].fillna("0.0").values[0])
-            new_row.append("")
-            new_row.append(df_base["免税"].fillna("").values[0])
+        new_row.append(tax_percent)
+        new_row.append("")
+        new_row.append(is_tax_free)
         rows.append(new_row)
     DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
 
 
-def make_import_file(current_data: dict, output_folder_path: str, df_bases: DataFrame):
+def make_import_file(
+    current_data: dict,
+    output_folder_path: str,
+    df_tax: DataFrame,
+    key_set: set,
+    product_size_dict: dict,
+    df_raw: DataFrame,
+    year: int,
+    month: int,
+):
     output_product = current_data["product"]["output"]
     import_list = output_product["import_list"]
 
-    source_path = os_path.join(output_folder_path, global_config_data["temp_product"])
+    product_path = os_path.join(output_folder_path, global_config_data["temp_product"])
+    temp_cover = os_path.join(output_folder_path, global_config_data["temp_cover"])
     target_path = os_path.join(output_folder_path, global_config_data["import_list"])
 
     product_title_str: str = output_product["product_detail"]["row4"]["contents"][0]
+    product_title_str = product_title_str.replace("，", ",")
     product_titles = product_title_str.split(",")
 
-    files = listdir(source_path)
     v = global_dict_chk_var["_import_var_option"].get()
     if v == "诺诺":
-        row_info = import_list[v]
-        set1 = set()
+        current_import = import_list[v]
         target_path = os_path.join(target_path, v)
         if not os_path.isdir(target_path):
             makedirs(target_path)
+        files = listdir(product_path)
         for i in files:
             target_file_path = os_path.join(target_path, i)
             make_import_one_nuonuo(
-                df_bases,
-                set1,
-                source_path,
+                df_tax,
+                product_path,
                 target_file_path,
                 i,
-                row_info,
+                current_import,
                 product_titles,
             )
+        return None
         pass
     elif v == "电子税务局":
-        row_info = import_list[v]
-        set1 = set()
+        current_import = import_list[v]
         target_path = os_path.join(target_path, v)
         if not os_path.isdir(target_path):
             makedirs(target_path)
+        files = listdir(product_path)
         for i in files:
             target_file_path = os_path.join(target_path, i)
             make_import_one_elec(
-                df_bases,
-                set1,
-                source_path,
+                df_tax,
+                product_path,
                 target_file_path,
                 i,
-                row_info,
+                current_import,
                 product_titles,
             )
+        return None
+        pass
+    elif v == "电子税务局（批量）":
+        target_path = os_path.join(target_path, v)
+        if not os_path.isdir(target_path):
+            makedirs(target_path)
+        current_import = import_list[v]
+        return make_batch_import_elec(
+            target_path,
+            key_set,
+            product_size_dict,
+            df_raw,
+            df_tax,
+            current_import,
+            year,
+            month,
+        )
         pass
 
     pass

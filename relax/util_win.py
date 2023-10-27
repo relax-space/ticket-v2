@@ -1,4 +1,4 @@
-from tkinter import END, Text, Tk, BooleanVar
+from tkinter import END, Text, Tk
 from relax.util import global_widgets
 
 

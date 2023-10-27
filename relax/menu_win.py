@@ -9,7 +9,6 @@ from tkinter import (
     Button,
     Entry,
     Event,
-    EventType,
     Frame,
     Label,
     Listbox,
@@ -18,12 +17,8 @@ from tkinter import (
     Toplevel,
     messagebox,
 )
-from relax.product_win_data import render_product_data
-from relax.ticket_win_data import render_ticket_data
-from relax.top_win_data import render_top_data
 from relax.util_win import center_window
 from PIL import Image, ImageTk
-import tkinter.font as tkFont
 from relax.util import (
     global_widgets,
     global_raw_data,

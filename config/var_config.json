@@ -2,6 +2,7 @@
     "temp_product": "temp_product",
     "temp_cover": "temp_cover",
     "temp_ticket": "temp_ticket",
+    "temp_ticket_crop": "temp_ticket_crop",
     "print": "最终打印",
     "import_list": "批量商品导入"
 }

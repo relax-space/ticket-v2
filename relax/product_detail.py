@@ -1,6 +1,6 @@
 import copy
-from pandas import DataFrame, isnull as pd_isnull
-from relax.excel_common import get_row_height_content, make_stamp, set_page_size
+from pandas import DataFrame
+from relax.file_common import get_row_height_content, make_stamp, set_page_size
 from relax.util import const_re, fill_zero_2, global_config_data
 from datetime import datetime
 from xlsxwriter.workbook import Workbook
@@ -149,7 +149,9 @@ def write_content(
         row_format_list[row_index],
     )
     row_index += 1
-    titles: list = row_content_list[row_index][0].split(",")
+    title_str = row_content_list[row_index][0]
+    title_str = title_str.replace("，", ",")
+    titles: list = title_str.split(",")
     row_format_4 = row_format_list[row_index]
     for i, v in enumerate(titles):
         ws1.write(row_index, i, v, row_format_4)
@@ -192,7 +194,9 @@ def write_content(
                 row_index, 0, row_index, 6, row_content_sum_1, row_format_sum_1
             )
             ws1.write(row_index, 7, sum_old, row_format_sum_1)
-        sum_old = row["H"]
+            sum_old = 0
+        # sum_old = row["H"]
+        sum_old += row["J"]
 
         row_index += 1
         row_height_data, product_name = get_row_height_content(

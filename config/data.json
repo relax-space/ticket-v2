@@ -6,14 +6,14 @@
         "output_path": "data",
         "batch_size": {
             "enable": true,
-            "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
+            "column_name": "客户id,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
             "path": "D:/file/开票/base/size.xlsx",
             "page_height_A4": 830,
             "page_height_A5": 380
         },
         "product": {
             "input": {
-                "product_path": "",
+                "product_path": "D:/file/开票/base/2023年9月商品明细.xls",
                 "column_name_1": "期望到货时间,供应商名称,报账日期",
                 "column_name": "订单基本信息:订单编号,订单基本信息:期望到货时间,订单基本信息:灶点编码,订单基本信息:供应商名称,商品信息:商品名称,商品信息:单价（元）,商品信息:计量单位,收验货单信息:收验货单总金额（元）,收验货单信息:数量,收验货单信息:小计（元）,支付信息:报账单编号,支付信息:报账日期,支付信息:报账金额（元）",
                 "column_sep_1": ",",
@@ -277,8 +277,8 @@
                 },
                 "import_list": {
                     "enable": true,
-                    "path": "D:/file/开票/base/base.xlsx",
-                    "default_value": "诺诺",
+                    "path": "D:/file/开票/base/tax.xlsx",
+                    "default_value": "电子税务局（批量）",
                     "诺诺": {
                         "row1_content": [
                             "注意：\n1、【金额是否含税】以导入时页面左上角设置为准    \n2、【是否清单票】以导入时页面左上角设置为准",
@@ -351,20 +351,46 @@
                             "折扣金额",
                             "优惠政策类型"
                         ]
+                    },
+                    "电子税务局（批量）": {
+                        "sheet_names": "1-发票基本信息,2-发票明细信息,3-特定业务信息,4-附加要素信息",
+                        "sale_name": "工行海口海秀支行",
+                        "sale_account": "2201021019200190388",
+                        "exclude_zd": "",
+                        "header_max": 100,
+                        "detail_max": 5000
                     }
                 }
             }
         },
-        "ticket": {}
+        "ticket": {
+            "mapping": {
+                "ticket_path": "D:/file/开票/base/raw_ticket",
+                "mapping_path": "D:/file/开票/base/全量发票查询导出结果.xlsx",
+                "column_name": "数电票号码,销方名称,开票日期,备注",
+                "column_sep": ",",
+                "date_format": "%Y-%m-%d %H:%M:%S",
+                "sheet_name": "发票基础信息",
+                "regax_pre": "",
+                "regax_post": "灶点",
+                "exclude_zd": ""
+            },
+            "margin": {
+                "left": 5,
+                "right": 5,
+                "top": 5,
+                "bottom": 10
+            }
+        }
     },
     {
         "checked": false,
         "menu_name": "农惠民",
         "supplier_name": "海南农惠民农业供应链科技有限公司",
-        "output_path": "data",
+        "output_path": "",
         "batch_size": {
             "enable": true,
-            "column_name": "客户id,筹措清单打印大小,筹措清单份数,发票打印大小,发票份数",
+            "column_name": "客户id,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
             "path": "",
             "page_height_A4": 830,
             "page_height_A5": 380
@@ -424,7 +450,7 @@
                         ]
                     },
                     "row2": {
-                        "height": 15,
+                        "height": 20,
                         "contents": [
                             "供应商：||||                       每日汇总表"
                         ],
@@ -438,7 +464,7 @@
                         ]
                     },
                     "row3": {
-                        "height": 15,
+                        "height": 20,
                         "contents": [
                             "灶点号,收货日期,金额"
                         ],
@@ -453,7 +479,7 @@
                         ]
                     },
                     "row_data": {
-                        "height": 15,
+                        "height": 20,
                         "contents": [],
                         "formats": [
                             {
@@ -475,7 +501,7 @@
                         ]
                     },
                     "row_last": {
-                        "height": 15,
+                        "height": 20,
                         "contents": [
                             "（盖章）"
                         ],
@@ -636,7 +662,7 @@
                 "import_list": {
                     "enable": true,
                     "path": "",
-                    "default_value": "诺诺",
+                    "default_value": "电子税务局（批量）",
                     "诺诺": {
                         "row1_content": [
                             "注意：\n1、【金额是否含税】以导入时页面左上角设置为准    \n2、【是否清单票】以导入时页面左上角设置为准",
@@ -709,10 +735,36 @@
                             "折扣金额",
                             "优惠政策类型"
                         ]
+                    },
+                    "电子税务局（批量）": {
+                        "sheet_names": "1-发票基本信息,2-发票明细信息,3-特定业务信息,4-附加要素信息",
+                        "sale_name": "中国农业银行海口中山南支行",
+                        "sale_account": "21294001040002183",
+                        "exclude_zd": "",
+                        "header_max": 100,
+                        "detail_max": 5000
                     }
                 }
             }
         },
-        "ticket": {}
+        "ticket": {
+            "mapping": {
+                "ticket_path": "",
+                "mapping_path": "",
+                "column_name": "数电票号码,销方名称,开票日期,备注",
+                "column_sep": ",",
+                "date_format": "%Y-%m-%d %H:%M:%S",
+                "sheet_name": "发票基础信息",
+                "regax_pre": "",
+                "regax_post": "灶点",
+                "exclude_zd": ""
+            },
+            "margin": {
+                "left": 5,
+                "right": 5,
+                "top": 5,
+                "bottom": 10
+            }
+        }
     }
 ]

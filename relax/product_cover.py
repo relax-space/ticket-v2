@@ -1,8 +1,7 @@
 import copy
-from pandas import DataFrame, isnull as pd_isnull
-from relax.excel_common import get_row_height_content, make_stamp, set_page_size
-from relax.util import const_re, fill_zero_2, global_config_data
-from datetime import datetime
+from pandas import DataFrame
+from relax.file_common import make_stamp, set_page_size
+from relax.util import const_re, global_config_data
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
 from os import makedirs, path as os_path
@@ -103,7 +102,9 @@ def write_content(
         row_format_list[row_index],
     )
     row_index += 1
-    titles: list = row_content_list[row_index][0].split(",")
+    title_str = row_content_list[row_index][0]
+    title_str = title_str.replace("，", ",")
+    titles: list = title_str.split(",")
     row_format_3 = row_format_list[row_index]
     for i, v in enumerate(titles):
         ws1.write(row_index, i, v, row_format_3)
@@ -215,9 +216,9 @@ def write_all_cover(
     page_margin = cover["page_margin"]
     # 灶点编码,收货日期,小计,本账单合计
     df_raw_cover = df_raw.loc[:, ["C", "B", "H", "M"]]
-    df_raw_cover.drop_duplicates(subset=["C", "B"], keep="first", inplace=True)
+    df_raw_cover_unique = df_raw_cover.drop_duplicates(subset=["C", "B"], keep="first")
     for v in key_set:
-        df = df_raw_cover.loc[df_raw_cover["C"] == v]
+        df = df_raw_cover_unique.loc[df_raw_cover_unique["C"] == v]
         df2 = df.sort_values(by=["B"])
         df2.reset_index(drop=True, inplace=True)
         write_one_product(
