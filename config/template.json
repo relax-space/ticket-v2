@@ -132,7 +132,7 @@
             },
             "product_detail": {
                 "product_name_settings": {
-                    "max_china_count_per_row": 17,
+                    "max_china_count_per_row": 16,
                     "height1": 15,
                     "height2": 7,
                     "height3": 11

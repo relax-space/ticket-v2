@@ -46,21 +46,22 @@ def get_row_count(raw: str, max_china_per_row: int = 17) -> tuple[int, str]:
             current_char_count += v
             if current_char_count > char_count_per_row:
                 current_char_count = 0
-                break_list.append(i)
                 i -= 1
+                break_list.append(i)
                 row_count += 1
             i += 1
+        if break_list:
+            break_list.append(total_count - 1)
 
         new_content = ""
         break_list_count = len(break_list)
         for i, v in enumerate(break_list):
             if i == 0:
-                new_content += raw[0:v] + "\n"
+                new_content += raw[0:v+1] + "\n"
             else:
-                new_content += raw[v : break_list[i + 1]] + "\n"
-            if i == break_list_count - 1:
-                new_content += raw[v:]
-        return row_count, new_content
+                new_content += raw[break_list[i - 1]+1:v+1] + "\n"
+
+        return row_count, new_content.strip()
 
 
 def get_row_height_content(
@@ -111,17 +112,16 @@ def make_stamp(ws1: Worksheet, row_height_list: list, page_height: int, stamp: d
         if current_height > page_height:
             current_height = 0
             page_height_but_last -= v
-            i -= 1
+            # 断开的索引是在下一页的第一条
             break_list.append(i)
+            i -= 1
             page_count += 1
         i += 1
 
     # 保证最后一页，至少有两行数据
-    rest_height = total_height - page_height_but_last
-    if rest_height == row_height_list[-1]:
-        if break_list:
-            break_list.pop()
-        break_list.append(row_count - 2)
+    if break_list and row_count-1 == break_list[-1]:
+        last_index = break_list.pop()
+        break_list.append(last_index - 1)
 
     dic_img = {
         "x_scale": x_scale,
@@ -253,7 +253,8 @@ def pdf_to_portrait(
                 (target_width - (left + right)) / page_width,
                 (target_height - (top + bottom)) / page_height,
             )
-            blank = pdf_write.add_blank_page(width=target_width, height=target_height)
+            blank = pdf_write.add_blank_page(
+                width=target_width, height=target_height)
             ty = target_height - page_height * scale_factor - top
             blank.merge_transformed_page(
                 page,

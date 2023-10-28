@@ -49,7 +49,7 @@ def init_view(root):
     fr_ticket = Frame()
     ndb.add(fr_product, text="商品清单")
     ndb.add(fr_ticket, text="发票清单")
-    ndb.pack(padx=10, pady=5, expand=True, fill=BOTH)
+    ndb.pack(pady=5, expand=True, fill=BOTH)
 
     global_widgets["root"] = root
     global_widgets["fr_menu"] = fr_menu
