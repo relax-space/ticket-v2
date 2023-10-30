@@ -651,6 +651,7 @@ def fr_top(fr_product_top):
         pady=(20, 20),
         sticky="W" + "E" + "N" + "S",
     )
+    global_widgets["btn_product_create"] = btn_product_create
 
     pass
 
@@ -789,6 +790,10 @@ def fr_special_zd(fr_product_bottom_3: Frame):
     btn1, img1 = render_tooltip(fr_2, 'asset/question.png',
                                 '多个灶点用逗号分隔！', (15, 15))
     ety_zd_input = Entry(fr_2, width=60)
+
+    def single_create_enter(e):
+        single_create()
+    ety_zd_input.bind('<Return>', single_create_enter)
     btn_zd_input = Button(fr_2, text="个别生成", command=single_create)
 
     row_index = 0
@@ -798,6 +803,7 @@ def fr_special_zd(fr_product_bottom_3: Frame):
     ety_zd_input.grid(row=row_index, column=3, padx=(5, 0))
     btn_zd_input.grid(row=row_index, column=4)
     global_widgets["ety_zd_input"] = ety_zd_input
+    global_widgets["btn_zd_input"] = btn_zd_input
     pass
 
 

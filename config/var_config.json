@@ -1,8 +1,1 @@
-{
-    "temp_product": "temp_product",
-    "temp_cover": "temp_cover",
-    "temp_ticket": "temp_ticket",
-    "temp_ticket_crop": "temp_ticket_crop",
-    "print": "最终打印",
-    "import_list": "批量商品导入"
-}
+{"temp_product": "temp_product", "temp_cover": "temp_cover", "temp_ticket": "temp_ticket", "temp_ticket_crop": "temp_ticket_crop", "print": "最终打印", "import_list": "批量商品导入", "url": "", "expired": "2024-01-27", "code": "f0588b70dea1c17b67b47e2c6a9dfe9c", "pwd": "202401knhgaba17f366c5782b1e9763e", "urls": ["https://www.baidu.com", "https://www.dingtalk.com/", "https://www.aliyun.com/product/list", "https://www.tencent.com/about.html", "https://www.jianshu.com/sign_in"], "is_actived": true}

@@ -1,6 +1,10 @@
+fitz==fitz-0.0.1.dev2
+PyMuPDF==1.23.5
+gmssl==3.2.2
 openpyxl==3.1.2
 pandas==2.0.2
 pdfCropMargins==2.0.3
 Pillow==10.1.0
-pypdf==3.16.4
+pypdf==3.17.0
+WMI==1.5.1
 XlsxWriter==3.1.2

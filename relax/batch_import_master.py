@@ -121,14 +121,18 @@ def refactor_data(
 
 def group_seq_no(break_list: list, header_list: list, product_list: list):
     slice_list = []
+    if not break_list:
+        slice_list.append((header_list, product_list))
+        return slice_list
+
     for i, v in enumerate(break_list):
         if i == 0:
             slice_list.append((header_list[: v + 1], product_list[: v + 1]))
         else:
             slice_list.append(
                 (
-                    header_list[break_list[i - 1] + 1 : v + 1],
-                    product_list[break_list[i - 1] + 1 : v + 1],
+                    header_list[break_list[i - 1] + 1: v + 1],
+                    product_list[break_list[i - 1] + 1: v + 1],
                 )
             )
         pass
@@ -172,7 +176,8 @@ def make_one_import(
         s3 = deepcopy(sheet_header_dict["S3"])
         s4 = deepcopy(sheet_header_dict["S4"])
         make_one_import_sheet(writer, header_list, sheet_names[0], s1, index=1)
-        make_one_import_sheet(writer, product_list, sheet_names[1], s2, index=2)
+        make_one_import_sheet(writer, product_list,
+                              sheet_names[1], s2, index=2)
         make_one_import_sheet(writer, [], sheet_names[2], s3)
         make_one_import_sheet(writer, [], sheet_names[3], s4)
     # 从内存移除
@@ -210,7 +215,8 @@ def make_batch_import_elec(
         month,
         detail_max,
     )
-    break_list = group_seq_no_index(calc_list, current_import["header_max"], detail_max)
+    break_list = group_seq_no_index(
+        calc_list, current_import["header_max"], detail_max)
     seq_no_group_list = group_seq_no(break_list, header_list, product_list)
 
     sheet_name_str: str = current_import["sheet_names"]

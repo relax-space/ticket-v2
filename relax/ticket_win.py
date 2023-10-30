@@ -236,15 +236,20 @@ def fr_special_zd(fr_special: Frame):
     btn1, img1 = render_tooltip(fr_2, 'asset/question.png',
                                 '多个灶点用逗号分隔！', (15, 15))
     ety_ticket_zd_input = Entry(fr_2, width=60)
-    btn_zd_input = Button(fr_2, text="个别生成", command=single_create)
+
+    def single_create_enter(e):
+        single_create()
+    ety_ticket_zd_input.bind('<Return>', single_create_enter)
+    btn_ticket_zd_input = Button(fr_2, text="个别生成", command=single_create)
 
     row_index = 0
     lbl_zd_title.grid(row=row_index, column=0, sticky=E)
     btn1.grid(row=row_index, column=1)
     btn1.image = img1
     ety_ticket_zd_input.grid(row=row_index, column=2, padx=(10, 0))
-    btn_zd_input.grid(row=row_index, column=3)
+    btn_ticket_zd_input.grid(row=row_index, column=3)
     global_widgets["ety_ticket_zd_input"] = ety_ticket_zd_input
+    global_widgets["btn_ticket_zd_input"] = btn_ticket_zd_input
     pass
 
 
@@ -328,6 +333,8 @@ def init_fr_ticket():
     global_widgets["ety_ticket_folder"] = ety_ticket_folder
     global_widgets["ety_ticket_mapping"] = ety_ticket_mapping
     global_widgets["ety_exclude_ticket_zd"] = ety_exclude_ticket_zd
+
+    global_widgets["btn_ticket_create"] = btn_ticket_create
 
     pass
 

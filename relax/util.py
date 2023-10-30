@@ -1,9 +1,22 @@
 from json import load as json_load, dump as json_dump
 from os import path as os_path
 from time import strftime, gmtime
+from datetime import date, datetime
+
 
 global_raw_data = []
-global_config_data = {}
+global_config_data = {
+    'temp_product': '',
+    'temp_cover': '',
+    'temp_ticket': '',
+    'temp_ticket_crop': '',
+    'print': '',
+    'import_list': '',
+    'url': '',
+    'expired': '',
+    'code': '',
+    'pwd': '',
+}
 const_re = {
     "year": "@@@@",
     "month": "####",
@@ -17,7 +30,17 @@ global_dict_chk_var = {
     "_page_size_var": "",
     "_stamp_var": "",
     "_import_var_option": "",
+    "_active_msg_var": "",
+    "_error_msg_var":"",
 }
+
+global_active_obj = {
+    "code": "",
+    "pwd": "",
+    "is_enable": False,
+    "expired": "",
+}
+global_check_result = ["1", ""]
 
 
 def init_raw_data() -> list:
@@ -65,6 +88,12 @@ def init_const() -> dict:
     with open("config/var_config.json", mode="r", encoding="utf8") as f:
         data = json_load(f)
         global_config_data.update(data)
+    return data
+
+
+def update_const() -> dict:
+    with open("config/var_config.json", mode="w", encoding="utf8") as f:
+        json_dump(global_config_data, f, ensure_ascii=False)
 
 
 def fill_zero_2(i: int) -> str:
@@ -89,3 +118,13 @@ def mm_to_pixel(mm: float):
 
 def get_runtime(start_stamp, end_stamp):
     return strftime("%H小时%M分%S秒", gmtime(end_stamp - start_stamp))
+
+
+def check_file_date(file_name) -> int:
+    stamp = os_path.getmtime(file_name)
+    file_date = datetime.fromtimestamp(stamp).date()
+    now_date = date.today()
+    res = now_date - file_date
+    return res.days
+
+

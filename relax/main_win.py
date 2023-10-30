@@ -9,6 +9,10 @@ from tkinter import (
     Frame,
     StringVar,
     Tk,
+    Button,
+    DISABLED,
+    NORMAL,
+    PhotoImage,
 )
 from tkinter.ttk import Notebook
 from relax.menu_win_data import render_menu_data
@@ -25,14 +29,15 @@ from relax.util import (
     global_widgets,
     global_dict_chk_var,
     global_raw_data,
+    global_config_data,
 )
 from relax.util_win import center_window
 from os import path as os_path, makedirs
+from relax.secret_win import init_secret, get_check_result, show_active_btn
 
 
 def init_view(root):
-    root.title("发票清单-部队")
-    center_window(root, 1024, 768)
+
     fr_menu = Frame(root, width=180, relief=GROOVE, bd=1)
     fr_menu.pack(side=LEFT, fill=Y)
     fr_menu.pack_propagate(0)
@@ -65,8 +70,12 @@ def init_view(root):
     init_fr_ticket()
 
 
+def init_perm():
+    result = get_check_result()
+    show_active_btn(result[0])
+
+
 def init_data():
-    init_const()
     init_raw_data()
     current_data = {}
     current_menu_index = 0
@@ -103,13 +112,23 @@ def main_win_start():
     create_folder()
 
     root = Tk()
+    root.title("发票清单-部队")
+
+    center_window(root, 1024, 768)
     global_widgets["root"] = root
     global_dict_chk_var["_import_var"] = BooleanVar()
     global_dict_chk_var["_page_size_var"] = BooleanVar()
     global_dict_chk_var["_stamp_var"] = BooleanVar()
     global_dict_chk_var["_import_var_option"] = StringVar()
+
+    init_const()
+    global_config_data['is_actived'] = False
+    if not init_secret():
+        return
+
     init_view(root)
     init_data()
+    init_perm()
     root.mainloop()
     pass
 
