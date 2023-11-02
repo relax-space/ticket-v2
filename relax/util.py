@@ -31,7 +31,7 @@ global_dict_chk_var = {
     "_stamp_var": "",
     "_import_var_option": "",
     "_active_msg_var": "",
-    "_error_msg_var":"",
+    "_error_msg_var": "",
 }
 
 global_active_obj = {
@@ -41,12 +41,20 @@ global_active_obj = {
     "expired": "",
 }
 global_check_result = ["1", ""]
+global_elec_hide_sheet = []
 
 
 def init_raw_data() -> list:
     with open("config/data.json", mode="r", encoding="utf8") as f:
         d = json_load(f)
     global_raw_data.extend(d)
+    return d
+
+
+def get_elec_hide_sheet():
+    with open("config/hide_sheet.json", mode="r", encoding="utf8") as f:
+        d = json_load(f)
+    global_elec_hide_sheet.extend(d)
     return d
 
 
@@ -100,6 +108,11 @@ def fill_zero_2(i: int) -> str:
     return f"{i:0>2}"
 
 
+def fill_zero_19(i: int) -> str:
+    return f"{i:0<19}"
+
+
+
 def get_unique_name(base_path: str, name: str, postfix: str, seq_no: int = 0) -> str:
     unique_name = f"{name}-{seq_no}" if seq_no else name
     if not os_path.isfile(os_path.join(base_path, f"{unique_name}{postfix}")):
@@ -126,5 +139,3 @@ def check_file_date(file_name) -> int:
     now_date = date.today()
     res = now_date - file_date
     return res.days
-
-

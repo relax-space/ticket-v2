@@ -3,7 +3,7 @@ from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
 from relax.read_excel_file import get_master_column_elec
 
-from relax.util import fill_zero_2
+from relax.util import fill_zero_2, fill_zero_19, global_elec_hide_sheet, get_elec_hide_sheet
 from copy import deepcopy
 from os import path as os_path
 
@@ -64,8 +64,8 @@ def refactor_data(
             "",
             "",
             zd_dict["title"],
-            zd_dict["tax_no"],
             "",
+            zd_dict["tax_no"],
             "",
             "",
             "",
@@ -85,12 +85,15 @@ def refactor_data(
             for _, row_tax in df_tax.iterrows():
                 if row_tax["A"] == prod:
                     tax_percent = row_tax["B"]
-                    tax_code = row_tax["C"]
+                    tax_code = fill_zero_19(row_tax["C"])
                     product_count += 1
                     break
             is_tax_free = "" if tax_percent else "免税"
             if tax_percent:
                 is_tax += 1
+            amt = row["J"]
+            if not amt:
+                continue
             # 共13列
             product_row = [
                 seq_no,
@@ -140,23 +143,34 @@ def group_seq_no(break_list: list, header_list: list, product_list: list):
 
 
 def make_one_import_sheet(
-    writer: ExcelWriter,
+    wb1: Workbook,
     content_list: list,
     sheet_name: str,
     header_list: list,
     index=0,
 ):
-    row_list = []
+    row_list = header_list
     if index == 1:
-        row_list = header_list + content_list
+        row_list += content_list
     elif index == 2:
-        row_list = header_list
         for v_list in content_list:
             row_list += v_list
 
-    DataFrame(row_list).to_excel(
-        writer, header=None, index=False, sheet_name=sheet_name
-    )
+    ws1: Worksheet = wb1.add_worksheet(sheet_name)
+    for i, rows in enumerate(row_list):
+        for j, v in enumerate(rows):
+            ws1.write(i, j, v)
+    return ws1
+
+
+def make_hidden_sheet(wb1: Workbook, hidden_sheet: list[dict]):
+    for d in hidden_sheet:
+        ws1: Worksheet = wb1.add_worksheet(d['name'])
+        content_list = d['content']
+        for i, v in enumerate(content_list):
+            ws1.write(i, 0, v)
+        ws1.hide()
+    pass
 
 
 def make_one_import(
@@ -165,21 +179,34 @@ def make_one_import(
     target_path: str,
     sheet_names: list,
     sheet_header_dict: dict,
+    hidden_sheet: list,
 ):
     header_list: list = seq_no_list[0]
     product_list: list = seq_no_list[1]
     file_name = f"批量导入_{file_no}.xlsx"
     target_file_path = os_path.join(target_path, file_name)
-    with ExcelWriter(target_file_path) as writer:
-        s1 = deepcopy(sheet_header_dict["S1"])
-        s2 = deepcopy(sheet_header_dict["S2"])
-        s3 = deepcopy(sheet_header_dict["S3"])
-        s4 = deepcopy(sheet_header_dict["S4"])
-        make_one_import_sheet(writer, header_list, sheet_names[0], s1, index=1)
-        make_one_import_sheet(writer, product_list,
-                              sheet_names[1], s2, index=2)
-        make_one_import_sheet(writer, [], sheet_names[2], s3)
-        make_one_import_sheet(writer, [], sheet_names[3], s4)
+    wb1 = Workbook(
+        target_file_path,
+        options={
+            # "strings_to_numbers": True,
+            "constant_memory": True,
+            "encoding": "utf-8",
+        },
+    )
+    s1 = deepcopy(sheet_header_dict["S1"])
+    s2 = deepcopy(sheet_header_dict["S2"])
+    s3 = deepcopy(sheet_header_dict["S3"])
+    s4 = deepcopy(sheet_header_dict["S4"])
+    make_one_import_sheet(wb1, header_list,
+                          sheet_names[0], s1, index=1)
+    make_one_import_sheet(wb1, product_list,
+                          sheet_names[1], s2, index=2)
+    make_one_import_sheet(wb1, [], sheet_names[2], s3)
+    make_one_import_sheet(wb1, [], sheet_names[3], s4)
+
+    make_hidden_sheet(wb1, hidden_sheet)
+
+    wb1.close()
     # 从内存移除
     header_list = []
     product_list = []
@@ -223,7 +250,12 @@ def make_batch_import_elec(
     sheet_name_str = sheet_name_str.replace("，", ",")
     sheet_name_list = sheet_name_str.split(",")
     sheet_header_dict = get_master_column_elec(sheet_name_list)
+
+    hidden_sheet = global_elec_hide_sheet
+    if not hidden_sheet:
+        hidden_sheet = get_elec_hide_sheet()
     for i, v in enumerate(seq_no_group_list):
-        make_one_import(i, v, target_path, sheet_name_list, sheet_header_dict)
+        make_one_import(i, v, target_path, sheet_name_list,
+                        sheet_header_dict, hidden_sheet)
 
     return detail_count_over

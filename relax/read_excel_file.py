@@ -72,7 +72,8 @@ def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
     )
     df = df[columns]
     # 一共13个
-    df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
+    df.columns = ["A", "B", "C", "D", "E",
+                  "F", "G", "H", "I", "J", "K", "L", "M"]
     # 订单已撤销:报账单编号为空
     df.dropna(subset=["K"], inplace=True)
     df.loc[:, "B"] = df["B"].apply(datetime_to_date)
@@ -103,7 +104,8 @@ def read_one_ticket(
     usecols = column_name.split(column_sep)
     df = read_excel(ticket_mapping_path, usecols=usecols, nrows=1)
     dt = df[usecols[2]].values.tolist()[0]
-    date = datetime.strptime(dt, date_format).replace(day=1) + timedelta(days=-1)
+    date = datetime.strptime(dt, date_format).replace(
+        day=1) + timedelta(days=-1)
     year = date.year
     month = date.month
     supplier = df[usecols[1]].values.tolist()[0]
@@ -288,10 +290,57 @@ def pivot_master_column(headers: list):
 
 
 def get_master_column_elec(sheet_names: list) -> dict:
-    df = read_excel("config/电子税务局批量导入模板.xlsx", header=[0, 1, 2], sheet_name=sheet_names)
+    df = read_excel("config/电子税务局批量导入模板.xlsx",
+                    header=[0, 1, 2], sheet_name=sheet_names)
     sheet_header_dict = {}
-    sheet_header_dict["S1"] = pivot_master_column(df[sheet_names[0]].columns.values)
-    sheet_header_dict["S2"] = pivot_master_column(df[sheet_names[1]].columns.values)
-    sheet_header_dict["S3"] = pivot_master_column(df[sheet_names[2]].columns.values)
-    sheet_header_dict["S4"] = pivot_master_column(df[sheet_names[3]].columns.values)
+    s1 = pivot_master_column(df[sheet_names[0]].columns.values)
+    for i1, iv in enumerate(s1):
+        if i1 != 0:
+            continue
+        pre = ""
+        for i, v in enumerate(iv):
+            v_new = v.strip()
+            if v_new == pre:
+                iv[i] = ''
+            pre = v_new
+
+    sheet_header_dict["S1"] = s1
+
+    s2 = pivot_master_column(df[sheet_names[1]].columns.values)
+    for i1, iv in enumerate(s2):
+        if i1 != 0:
+            continue
+        pre = ""
+        for i, v in enumerate(iv):
+            v_new = v.strip()
+            if v_new == pre:
+                iv[i] = ''
+            pre = v_new
+
+    sheet_header_dict["S2"] = s2
+    s3 = pivot_master_column(df[sheet_names[2]].columns.values)
+    for i1, iv in enumerate(s3):
+        if i1 != 0:
+            continue
+        pre = ""
+        for i, v in enumerate(iv):
+            v_new = v.strip()
+            if v_new == pre:
+                iv[i] = ''
+            pre = v_new
+
+    sheet_header_dict["S3"] = s3
+
+    s4 = pivot_master_column(
+        df[sheet_names[3]].columns.values)
+    for i1, iv in enumerate(s4):
+        if i1 != 0:
+            continue
+        pre = ""
+        for i, v in enumerate(iv):
+            v_new = v.strip()
+            if v_new == pre:
+                iv[i] = ''
+            pre = v_new
+    sheet_header_dict["S4"] = s4
     return sheet_header_dict

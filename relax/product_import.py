@@ -1,7 +1,7 @@
 from pandas import DataFrame, isna
 from relax.batch_import_master import make_batch_import_elec
 from relax.read_excel_file import read_product
-from relax.util import global_dict_chk_var, global_config_data
+from relax.util import global_dict_chk_var, global_config_data, fill_zero_19
 from os import listdir, path as os_path, makedirs
 
 
@@ -23,6 +23,8 @@ def make_import_one_nuonuo(
             continue
         if not str.isdecimal(cond):
             continue
+        if not row["H"]:
+            continue
         new_row = []
         prod = row["D"].replace("\n", "")
         df_tax = df_taxs.loc[df_taxs["A"] == prod]
@@ -39,7 +41,8 @@ def make_import_one_nuonuo(
         new_row.append(df_tax["C"].values[0])
         new_row.append(is_tax_free)
         rows.append(new_row)
-    DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
+    DataFrame(rows, columns=columns).to_excel(
+        target_path, startrow=0, index=False)
     pass
 
 
@@ -61,13 +64,15 @@ def make_import_one_elec(
             continue
         if not str.isdecimal(cond):
             continue
+        if not row["H"]:
+            continue
         new_row = []
         prod = row["D"].replace("\n", "")
         df_tax = df_taxs.loc[df_taxs["A"] == prod]
         new_row.append(prod)
         tax_percent = df_tax["B"].values[0]
         is_tax_free = "" if tax_percent else "免税"
-        new_row.append(tax_percent)
+        new_row.append(fill_zero_19(df_tax["C"].values[0]))
         new_row.append("")
         new_row.append(row["E"])
         new_row.append(row["G"])
@@ -78,7 +83,8 @@ def make_import_one_elec(
         new_row.append("")
         new_row.append(is_tax_free)
         rows.append(new_row)
-    DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
+    DataFrame(rows, columns=columns).to_excel(
+        target_path, startrow=0, index=False)
 
 
 def make_import_file(
@@ -94,9 +100,12 @@ def make_import_file(
     output_product = current_data["product"]["output"]
     import_list = output_product["import_list"]
 
-    product_path = os_path.join(output_folder_path, global_config_data["temp_product"])
-    temp_cover = os_path.join(output_folder_path, global_config_data["temp_cover"])
-    target_path = os_path.join(output_folder_path, global_config_data["import_list"])
+    product_path = os_path.join(
+        output_folder_path, global_config_data["temp_product"])
+    temp_cover = os_path.join(
+        output_folder_path, global_config_data["temp_cover"])
+    target_path = os_path.join(
+        output_folder_path, global_config_data["import_list"])
 
     product_title_str: str = output_product["product_detail"]["row4"]["contents"][0]
     product_title_str = product_title_str.replace("，", ",")
