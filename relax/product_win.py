@@ -104,7 +104,7 @@ def create_click_valid():
         ety_product_input.focus_set()
         return False
 
-    elif global_dict_chk_var["_import_var"].get():
+    if global_dict_chk_var["_import_var"].get():
         if not ety_import.get():
             messagebox.showwarning("警告", "税率表不能为空！")
             ety_import.focus_set()
@@ -142,7 +142,7 @@ def create_click_valid():
                     ety_detail_max.focus_set()
                     return False
 
-    elif global_dict_chk_var["_page_size_var"].get():
+    if global_dict_chk_var["_page_size_var"].get():
         if not ety_page_size.get():
             messagebox.showwarning("警告", "尺寸表不能为空！")
             ety_page_size.focus_set()
@@ -155,7 +155,7 @@ def create_click_valid():
             messagebox.showwarning("警告", "A5不能为空！")
             ety_A5_page_height.focus_set()
             return False
-    elif global_dict_chk_var["_stamp_var"].get():
+    if global_dict_chk_var["_stamp_var"].get():
         if not ety_stamp.get():
             messagebox.showwarning("警告", "印章路径不能为空！")
             ety_stamp.focus_set()

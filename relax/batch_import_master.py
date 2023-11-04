@@ -71,7 +71,7 @@ def refactor_data(
             "",
             "",
             zd_dict["remark"],
-            "是",
+            "",
             sale_name,
             sale_account,
             "是",

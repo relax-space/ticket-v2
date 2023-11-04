@@ -87,7 +87,7 @@ def create_click_valid():
         messagebox.showwarning("警告", "输出文件夹路径不能为空！")
         ety_output_path.focus_set()
         return False
-    elif global_dict_chk_var["_page_size_var"]:
+    if global_dict_chk_var["_page_size_var"]:
         if not ety_page_size.get():
             messagebox.showwarning("警告", "尺寸表不能为空！")
             ety_page_size.focus_set()
@@ -100,7 +100,7 @@ def create_click_valid():
             messagebox.showwarning("警告", "A5不能为空！")
             ety_A5_page_height.focus_set()
             return False
-    elif not ety_ticket_folder.get():
+    if not ety_ticket_folder.get():
         messagebox.showwarning("警告", "发票文件夹不能为空！")
         ety_ticket_folder.focus_get()
         return False
