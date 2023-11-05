@@ -1,6 +1,6 @@
 from pandas import read_excel, DataFrame, isnull as pd_isnull
 from datetime import datetime, timedelta
-from os import listdir
+from os import listdir, path as os_path
 from re import search as re_search, S as re_S
 from relax.util import const_re
 from calendar import monthrange
@@ -72,8 +72,7 @@ def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
     )
     df = df[columns]
     # 一共13个
-    df.columns = ["A", "B", "C", "D", "E",
-                  "F", "G", "H", "I", "J", "K", "L", "M"]
+    df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
     # 订单已撤销:报账单编号为空
     df.dropna(subset=["K"], inplace=True)
     df.loc[:, "B"] = df["B"].apply(datetime_to_date)
@@ -104,8 +103,7 @@ def read_one_ticket(
     usecols = column_name.split(column_sep)
     df = read_excel(ticket_mapping_path, usecols=usecols, nrows=1)
     dt = df[usecols[2]].values.tolist()[0]
-    date = datetime.strptime(dt, date_format).replace(
-        day=1) + timedelta(days=-1)
+    date = datetime.strptime(dt, date_format).replace(day=1) + timedelta(days=-1)
     year = date.year
     month = date.month
     supplier = df[usecols[1]].values.tolist()[0]
@@ -290,8 +288,7 @@ def pivot_master_column(headers: list):
 
 
 def get_master_column_elec(sheet_names: list) -> dict:
-    df = read_excel("config/电子税务局批量导入模板.xlsx",
-                    header=[0, 1, 2], sheet_name=sheet_names)
+    df = read_excel("config/电子税务局批量导入模板.xlsx", header=[0, 1, 2], sheet_name=sheet_names)
     sheet_header_dict = {}
     s1 = pivot_master_column(df[sheet_names[0]].columns.values)
     for i1, iv in enumerate(s1):
@@ -301,7 +298,7 @@ def get_master_column_elec(sheet_names: list) -> dict:
         for i, v in enumerate(iv):
             v_new = v.strip()
             if v_new == pre:
-                iv[i] = ''
+                iv[i] = ""
             pre = v_new
 
     sheet_header_dict["S1"] = s1
@@ -314,7 +311,7 @@ def get_master_column_elec(sheet_names: list) -> dict:
         for i, v in enumerate(iv):
             v_new = v.strip()
             if v_new == pre:
-                iv[i] = ''
+                iv[i] = ""
             pre = v_new
 
     sheet_header_dict["S2"] = s2
@@ -326,13 +323,12 @@ def get_master_column_elec(sheet_names: list) -> dict:
         for i, v in enumerate(iv):
             v_new = v.strip()
             if v_new == pre:
-                iv[i] = ''
+                iv[i] = ""
             pre = v_new
 
     sheet_header_dict["S3"] = s3
 
-    s4 = pivot_master_column(
-        df[sheet_names[3]].columns.values)
+    s4 = pivot_master_column(df[sheet_names[3]].columns.values)
     for i1, iv in enumerate(s4):
         if i1 != 0:
             continue
@@ -340,7 +336,47 @@ def get_master_column_elec(sheet_names: list) -> dict:
         for i, v in enumerate(iv):
             v_new = v.strip()
             if v_new == pre:
-                iv[i] = ''
+                iv[i] = ""
             pre = v_new
     sheet_header_dict["S4"] = s4
     return sheet_header_dict
+
+
+def read_bill_sum(bill_sum_path: str):
+    use_column = ["灶点编码", "报账单金额"]
+    df = read_excel(bill_sum_path, usecols=use_column, dtype={"灶点编码": str})
+    df.drop_duplicates(inplace=True)
+    df.columns = ["A", "B"]
+
+    df.loc[:, "B"] = df["B"].apply(convert_amt)
+    return df
+
+
+def convert_amt(amt_str: str):
+    amt_str = amt_str.replace(",", "")
+    return float(amt_str)
+    pass
+
+
+def read_correct_zd(correct_zd_path: str):
+    lst = listdir(correct_zd_path)
+    zd_obj_list = {}
+    for i in lst:
+        zd = i.rsplit(".", 1)[0]
+        zd_obj = []
+        df = read_excel(os_path.join(correct_zd_path, i), header=3)
+        sum = 0.0
+        for _, row in df.iterrows():
+            if row["序号"] == "小计":
+                continue
+            elif row["序号"] == "本账单合计":
+                sum = float(row["金额"])
+            else:
+                prod = row["商品名称"]
+                if pd_isnull(prod):
+                    continue
+                zd_obj.append(
+                    (prod, float(row["单价"]), float(row["数量"]), float(row["金额"]))
+                )
+        zd_obj_list[zd] = {"prod_list": zd_obj, "sum": sum}
+    return zd_obj_list

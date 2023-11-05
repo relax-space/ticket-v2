@@ -11,6 +11,7 @@ from relax.product_detail import write_all_product
 from relax.product_import import make_import_file
 from relax.read_excel_file import (
     get_all_tax,
+    read_bill_sum,
     read_one_product,
     read_all_product,
     get_page_size_list,
@@ -23,10 +24,11 @@ from relax.util import (
     global_dict_chk_var,
     global_config_data,
 )
-from os import path as os_path, makedirs, startfile as os_startfile
+from os import path as os_path, makedirs, startfile as os_startfile, listdir
 from traceback import format_exc
 from tkinter import (
     BOTH,
+    DISABLED,
     E,
     END,
     LEFT,
@@ -45,12 +47,78 @@ from tkinter import (
     Radiobutton,
     Scrollbar,
     Text,
+    Toplevel,
     filedialog,
     messagebox,
 )
 from relax.win_data import json_data
 from time import time
-from relax.util_win import render_tooltip
+from relax.util_win import center_window, render_tooltip
+from relax.product_check import check_bill, update_raw_df
+
+
+def show_incorrect_zd(abs_path: str, incorrect_zd_set: set):
+    root = global_widgets["root"]
+    popup = Toplevel(root)
+    popup.title("警告")
+    center_window(popup, 700, 300)
+    lbl_msg_1 = Label(
+        popup,
+        text="部分灶点总额不对:",
+    )
+    lbl_msg_2 = Label(
+        popup,
+        text="1.请下载报账单商品明细",
+    )
+    lbl_msg_3 = Label(
+        popup,
+        text="2.修改文件名为灶点号.xls（比如：11001.xls）",
+    )
+    lbl_msg_4 = Label(
+        popup,
+        text="3.将文件放到下面路径后，重新点击 生成！",
+    )
+    ety_msg = Entry(
+        popup,
+        width=120,
+        relief="flat",
+        bg="gray94",
+    )
+    ety_msg.insert(0, abs_path)
+    ety_msg.config(state="readonly")
+    lbl_zd_title = Label(popup, text="需要下载的报账单商品明细如下：")
+    txt_zd = Text(
+        popup,
+        width=120,
+        relief="flat",
+        bg="gray94",
+        wrap="word",
+    )
+    zd_list_str = ",".join(incorrect_zd_set)
+    txt_zd.insert(1.0, zd_list_str)
+    txt_zd.config(state=DISABLED)
+
+    lbl_msg_1.grid(row=0, column=0, sticky=W, pady=(5, 0))
+    lbl_msg_2.grid(row=1, column=0, sticky=W)
+    lbl_msg_3.grid(row=2, column=0, sticky=W)
+    lbl_msg_4.grid(row=3, column=0, sticky=W)
+    ety_msg.grid(row=4, column=0, sticky=W)
+    lbl_zd_title.grid(row=5, column=0, sticky=W)
+    txt_zd.grid(row=6, column=0, sticky=W)
+
+
+def get_diff_zd(path: str, incorrect_zd_set: set) -> set:
+    list = listdir(path)
+    new_set = set()
+    for i in list:
+        s = i.rsplit(".", 1)[0]
+        new_set.add(s)
+
+    if incorrect_zd_set != new_set:
+        zd_diff = incorrect_zd_set.difference(new_set)
+        return zd_diff
+    return None
+    pass
 
 
 def path_click():
@@ -68,11 +136,42 @@ def path_click():
     pass
 
 
+def bill_click():
+    lst_menu: Listbox = global_widgets["lst_menu"]
+    if not lst_menu.curselection():
+        messagebox.showinfo("提示", "请先在左边选择一个模板")
+        return
+
+    file_path = filedialog.askopenfilename()
+    if not file_path:
+        return
+    ety_bill_sum_input: Entry = global_widgets["ety_bill_sum_input"]
+    ety_bill_sum_input.delete(0, END)
+    ety_bill_sum_input.insert(0, file_path)
+    pass
+
+
+def check_bill_click():
+    lst_menu: Listbox = global_widgets["lst_menu"]
+    if not lst_menu.curselection():
+        messagebox.showinfo("提示", "请先在左边选择一个模板")
+        return
+
+    file_path = filedialog.askdirectory()
+    if not file_path:
+        return
+    ety_bill_sum_input: Entry = global_widgets["ety_bill_sum_input"]
+    ety_bill_sum_input.delete(0, END)
+    ety_bill_sum_input.insert(0, file_path)
+    pass
+
+
 def create_click_valid():
     lst_menu: Listbox = global_widgets["lst_menu"]
     ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
     ety_output_path: Entry = global_widgets["ety_output_path"]
     ety_product_input: Entry = global_widgets["ety_product_input"]
+    ety_bill_sum_input: Entry = global_widgets["ety_bill_sum_input"]
     ety_import: Entry = global_widgets["ety_import"]
     ety_page_size: Entry = global_widgets["ety_page_size"]
     ety_A4_page_height: Entry = global_widgets["ety_A4_page_height"]
@@ -100,8 +199,12 @@ def create_click_valid():
         ety_output_path.focus_set()
         return False
     elif not ety_product_input.get():
-        messagebox.showwarning("警告", "商品文件路径不能为空！")
+        messagebox.showwarning("警告", "灶点商品销售一览表不能为空！")
         ety_product_input.focus_set()
+        return False
+    elif not ety_bill_sum_input.get():
+        messagebox.showwarning("警告", "灶点一览表不能为空！")
+        ety_bill_sum_input.focus_set()
         return False
 
     if global_dict_chk_var["_import_var"].get():
@@ -188,7 +291,8 @@ def create_click_raw(only_zd_list: list):
 
     lst_menu: Listbox = global_widgets["lst_menu"]
     ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
-
+    ety_bill_check_input: Entry= global_widgets["ety_bill_check_input"]
+    
     key = lst_menu.get(lst_menu.curselection()[0])
     current_data = get_current_data(key)
     json_data(current_data)
@@ -220,17 +324,54 @@ def create_click_raw(only_zd_list: list):
     )
     if not os_path.isdir(output_folder_path):
         makedirs(output_folder_path)
+
+    usecols_str: str = product_input["column_name"]
+    column_sep_2: str = product_input["column_sep_2"]
+    df = read_all_product(product_path, usecols_str, column_sep_1, column_sep_2)
+    if only_zd_list:
+        df = df[df["C"].isin(only_zd_list)]
+    df_set = set(df["C"].values)
+
+    bill_sum_path: str = product_input["bill_sum_path"]
+    df_bill = read_bill_sum(bill_sum_path)
+    if only_zd_list:
+        df_bill = df_bill[df_bill["A"].isin(only_zd_list)]
+    df_bill_set = set(df_bill["A"].values)
+    if df_set != df_bill_set:
+        zd_difference = df_set.difference(df_bill_set)
+        if zd_difference:
+            messagebox.showwarning(
+                "警告", f"灶点存在于 灶点商品销售一览表，但是不存在于 灶点一览表：{zd_difference}"
+            )
+            return
+        zd_difference = df_bill_set.difference(df_set)
+        if zd_difference:
+            messagebox.showwarning(
+                "警告", f"灶点存在于 灶点一览表，但是不存在于 灶点商品销售一览表：{zd_difference}"
+            )
+            return
+    incorrect_zd_set = check_bill(df_bill, df)
+    if incorrect_zd_set:
+        correct_zd_path = os_path.join(output_folder_path, global_config_data["temp_zd"])
+        if not os_path.isdir(correct_zd_path):
+            makedirs(correct_zd_path)
+        correct_zd_path = os_path.abspath(correct_zd_path)
+        ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
+        ety_bill_check_input.delete(0, END)
+        ety_bill_check_input.insert(END, correct_zd_path)
+        ety_bill_check_input.config(state="readonly")
+
+        diff_zd = get_diff_zd(correct_zd_path, incorrect_zd_set)
+        if diff_zd:
+            show_incorrect_zd(correct_zd_path, diff_zd)
+            return
+        update_raw_df(correct_zd_path, df, incorrect_zd_set)
+
     batch_size = current_data["batch_size"]
     zd_set, product_size_dict, ticket_size_dict = get_page_size_list(
         batch_size, year, month
     )
-    usecols_str: str = current_data["product"]["input"]["column_name"]
-    column_sep_2: str = current_data["product"]["input"]["column_sep_2"]
-    df = read_all_product(product_path, usecols_str,
-                          column_sep_1, column_sep_2)
-    if only_zd_list:
-        df = df[df["C"].isin(only_zd_list)]
-    df_set = set(df["C"].values)
+
     if zd_set:
         zd_difference = df_set.difference(zd_set)
         if zd_difference:
@@ -259,6 +400,7 @@ def create_click_raw(only_zd_list: list):
             messagebox.showwarning("警告", f"税率表缺少商品：{zd_difference}")
             return
         pass
+
     t2 = time()
 
     write_all_product(
@@ -385,9 +527,10 @@ def stamp_click():
 
 def fr_top_1(fr_product_top):
     fr_0 = Frame(fr_product_top)
-    lbl_product_input = Label(fr_0, text="商品文件路径:*", fg="red")
-    btn1, img1 = render_tooltip(fr_0, 'asset/question.png',
-                                '只会读取excel的第一个sheet！', (15, 15))
+    lbl_product_input = Label(fr_0, text="灶点商品销售一览表:*", fg="red")
+    btn1, img1 = render_tooltip(
+        fr_0, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
+    )
     ety_product_input = Entry(fr_0, width=60)
     btn_product_input = Button(fr_0, text="选择", command=path_click)
 
@@ -399,6 +542,42 @@ def fr_top_1(fr_product_top):
 
     global_widgets["ety_product_input"] = ety_product_input
     global_widgets["btn_product_input"] = btn_product_input
+    return fr_0
+
+
+def fr_top_1_1(fr_product_top):
+    fr_0 = Frame(fr_product_top)
+    lbl_bill_sum_input = Label(fr_0, text="灶点一览表:*", fg="red")
+    btn1, img1 = render_tooltip(
+        fr_0, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
+    )
+    ety_bill_sum_input = Entry(fr_0, width=60)
+    btn_bill_sum_input = Button(fr_0, text="选择", command=bill_click)
+
+    lbl_bill_sum_input.grid(row=0, column=0, sticky=E, padx=(56, 0))
+    btn1.grid(row=0, column=1)
+    btn1.image = img1
+    ety_bill_sum_input.grid(row=0, column=2, padx=(12, 0))
+    btn_bill_sum_input.grid(row=0, column=3)
+
+    global_widgets["ety_bill_sum_input"] = ety_bill_sum_input
+    global_widgets["btn_bill_sum_input"] = btn_bill_sum_input
+    return fr_0
+
+
+def fr_top_1_2(fr_product_top):
+    fr_0 = Frame(fr_product_top)
+    lbl_bill_check_input = Label(fr_0, text="需要校准的灶点文件夹:")
+    ety_bill_check_input = Entry(
+        fr_0,
+        width=60,
+        relief="flat",
+        bg="gray94",
+    )
+
+    lbl_bill_check_input.grid(row=0, column=0, sticky=E, padx=(8, 0))
+    ety_bill_check_input.grid(row=0, column=2, padx=(12, 0))
+    global_widgets["ety_bill_check_input"] = ety_bill_check_input
     return fr_0
 
 
@@ -465,8 +644,9 @@ def fr_top_3(fr_product_top):
 def fr_top_4(fr_product_top):
     fr_0 = Frame(fr_product_top)
     lbl_import = Label(fr_0, text="税率表:")
-    btn1, img1 = render_tooltip(fr_0, 'asset/question.png',
-                                '只会读取excel的第一个sheet！', (15, 15))
+    btn1, img1 = render_tooltip(
+        fr_0, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
+    )
     ety_import = Entry(fr_0, width=60)
     btn_import = Button(fr_0, text="选择", command=import_click)
 
@@ -499,8 +679,7 @@ def fr_top_5(fr_product_top):
 
     fr_1 = Frame(fr_batch_info)
     lbl_exclude_zd = Label(fr_1, text="排除灶点号:")
-    btn2, img1 = render_tooltip(fr_1, 'asset/question.png',
-                                '多个灶点用逗号分隔！', (15, 15))
+    btn2, img1 = render_tooltip(fr_1, "asset/question.png", "多个灶点用逗号分隔！", (15, 15))
     ety_exclude_zd = Entry(fr_1, width=60)
 
     lbl_exclude_zd.grid(row=0, column=0, sticky=E, padx=(34, 0), pady=(3, 0))
@@ -574,30 +753,27 @@ def fr_top_8(fr_product_top):
     lbl_Y_stamp_scale_cover = Label(fr_0, text="高度缩放：")
     ety_Y_stamp_scale_cover = Entry(fr_0, width=6, justify=RIGHT)
 
-    lbl_stamp_scale_cover.grid(row=0, column=0, padx=(50, 0))
-    lbl_X_stamp_scale_cover.grid(row=0, column=1)
-    ety_X_stamp_scale_cover.grid(row=0, column=2)
-    lbl_Y_stamp_scale_cover.grid(row=0, column=3)
-    ety_Y_stamp_scale_cover.grid(row=0, column=4)
-    global_widgets["ety_X_stamp_scale_cover"] = ety_X_stamp_scale_cover
-    global_widgets["ety_Y_stamp_scale_cover"] = ety_Y_stamp_scale_cover
-    return fr_0
-    pass
-
-
-def fr_top_9(fr_product_top):
-    fr_0 = Frame(fr_product_top)
     lbl_stamp_scale_product = Label(fr_0, text="商品缩放：")
     lbl_X_stamp_scale_product = Label(fr_0, text="宽度缩放：")
     ety_X_stamp_scale_product = Entry(fr_0, width=6, justify=RIGHT)
     lbl_Y_stamp_scale_product = Label(fr_0, text="高度缩放：")
     ety_Y_stamp_scale_product = Entry(fr_0, width=6, justify=RIGHT)
 
-    lbl_stamp_scale_product.grid(row=0, column=0, padx=(50, 0))
-    lbl_X_stamp_scale_product.grid(row=0, column=1)
-    ety_X_stamp_scale_product.grid(row=0, column=2)
-    lbl_Y_stamp_scale_product.grid(row=0, column=3)
-    ety_Y_stamp_scale_product.grid(row=0, column=4)
+    lbl_stamp_scale_cover.grid(row=0, column=0, padx=(50, 0))
+    lbl_X_stamp_scale_cover.grid(row=0, column=1)
+    ety_X_stamp_scale_cover.grid(row=0, column=2)
+    lbl_Y_stamp_scale_cover.grid(row=0, column=3)
+    ety_Y_stamp_scale_cover.grid(row=0, column=4)
+
+    lbl_stamp_scale_product.grid(row=0, column=5, padx=(10, 0))
+    lbl_X_stamp_scale_product.grid(row=0, column=6)
+    ety_X_stamp_scale_product.grid(row=0, column=7)
+    lbl_Y_stamp_scale_product.grid(row=0, column=8)
+    ety_Y_stamp_scale_product.grid(row=0, column=9)
+
+    global_widgets["ety_X_stamp_scale_cover"] = ety_X_stamp_scale_cover
+    global_widgets["ety_Y_stamp_scale_cover"] = ety_Y_stamp_scale_cover
+
     global_widgets["ety_X_stamp_scale_product"] = ety_X_stamp_scale_product
     global_widgets["ety_Y_stamp_scale_product"] = ety_Y_stamp_scale_product
     return fr_0
@@ -608,6 +784,14 @@ def fr_top(fr_product_top):
     row_index = 0
     fr_1 = fr_top_1(fr_product_top)
     fr_1.grid(row=row_index, column=0, sticky=W)
+
+    row_index += 1
+    fr_1_1 = fr_top_1_1(fr_product_top)
+    fr_1_1.grid(row=row_index, column=0, sticky=W)
+
+    row_index += 1
+    fr_1_2 = fr_top_1_2(fr_product_top)
+    fr_1_2.grid(row=row_index, column=0, sticky=W)
 
     row_index += 1
     fr_2 = fr_top_2(fr_product_top)
@@ -637,12 +821,13 @@ def fr_top(fr_product_top):
     row_index += 1
     fr_8.grid(row=row_index, column=0, sticky=W)
 
-    fr_9 = fr_top_9(fr_product_top)
-    row_index += 1
-    fr_9.grid(row=row_index, column=0, sticky=W)
+    # fr_9 = fr_top_9(fr_product_top)
+    # row_index += 1
+    # fr_9.grid(row=row_index, column=0, sticky=W)
 
     btn_product_create = Button(
-        fr_product_top, text='生成', width=10, command=create_click)
+        fr_product_top, text="生成", width=10, command=create_click
+    )
     btn_product_create.grid(
         row=0,
         column=1,
@@ -677,14 +862,12 @@ def fr_cover(fr_product_bottom_1: Frame):
         global_widgets[f"ety_column_width_cover_{i}"] = ety_column_width
 
     column_index = 0
-    lbl_column_width_title.grid(
-        row=0, column=column_index, padx=(20, 0), sticky=E)
+    lbl_column_width_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for v in list:
         lbl_column_width: Label = global_widgets[f"lbl_column_width_cover_{v}"]
         ety_column_width: Entry = global_widgets[f"ety_column_width_cover_{v}"]
-        lbl_column_width.grid(row=0, column=column_index,
-                              sticky=E, padx=(0, 2))
+        lbl_column_width.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_column_width.grid(row=0, column=column_index, padx=(3, 2))
         column_index += 1
@@ -701,8 +884,7 @@ def fr_cover(fr_product_bottom_1: Frame):
         global_widgets[f"ety_row_height_cover_{i}"] = ety_row_height
 
     column_index = 0
-    lbl_row_height_title.grid(
-        row=0, column=column_index, padx=(20, 0), sticky=E)
+    lbl_row_height_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for i, v in enumerate(list):
         lbl_row_height: Label = global_widgets[f"lbl_row_height_cover_{i}"]
@@ -736,14 +918,12 @@ def fr_product(fr_product_bottom_2):
         global_widgets[f"ety_column_width_product_{i}"] = ety_column_width
 
     column_index = 0
-    lbl_column_width_title.grid(
-        row=0, column=column_index, padx=(20, 0), sticky=E)
+    lbl_column_width_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for v in list:
         lbl_column_width: Label = global_widgets[f"lbl_column_width_product_{v}"]
         ety_column_width: Entry = global_widgets[f"ety_column_width_product_{v}"]
-        lbl_column_width.grid(row=0, column=column_index,
-                              sticky=E, padx=(0, 2))
+        lbl_column_width.grid(row=0, column=column_index, sticky=E, padx=(0, 2))
         column_index += 1
         ety_column_width.grid(row=0, column=column_index, padx=(0, 10))
         column_index += 1
@@ -760,8 +940,7 @@ def fr_product(fr_product_bottom_2):
         global_widgets[f"ety_row_height_product_{i}"] = ety_row_height
 
     column_index = 0
-    lbl_row_height_title.grid(
-        row=0, column=column_index, padx=(20, 0), sticky=E)
+    lbl_row_height_title.grid(row=0, column=column_index, padx=(20, 0), sticky=E)
     column_index += 1
     for i, v in enumerate(list):
         lbl_row_height: Label = global_widgets[f"lbl_row_height_product_{i}"]
@@ -787,13 +966,13 @@ def fr_special_zd(fr_product_bottom_3: Frame):
     fr_2 = Frame(fr_product_bottom_3)
     fr_2.pack(side=TOP, anchor=NW)
     lbl_zd_title = Label(fr_2, text=f"灶点号:")
-    btn1, img1 = render_tooltip(fr_2, 'asset/question.png',
-                                '多个灶点用逗号分隔！', (15, 15))
+    btn1, img1 = render_tooltip(fr_2, "asset/question.png", "多个灶点用逗号分隔！", (15, 15))
     ety_zd_input = Entry(fr_2, width=60)
 
     def single_create_enter(e):
         single_create()
-    ety_zd_input.bind('<Return>', single_create_enter)
+
+    ety_zd_input.bind("<Return>", single_create_enter)
     btn_zd_input = Button(fr_2, text="个别生成", command=single_create)
 
     row_index = 0
@@ -827,8 +1006,7 @@ def fr_log(fr_product_bottom_3):
 
 
 def fr_bottom(fr_product_bottom: Frame):
-    fr_input_sep_1 = Frame(fr_product_bottom, height=2,
-                           borderwidth=1, relief="groove")
+    fr_input_sep_1 = Frame(fr_product_bottom, height=2, borderwidth=1, relief="groove")
     fr_input_sep_1.pack(side=TOP, fill=X, padx=3, pady=5)
 
     fr_product_bottom_1 = Frame(fr_product_bottom, height=80)

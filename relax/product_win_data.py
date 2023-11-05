@@ -1,5 +1,6 @@
 from tkinter import END, Entry
-from relax.util import global_widgets, global_dict_chk_var
+from relax.util import global_widgets, global_dict_chk_var, global_config_data
+from os import path as os_path, makedirs
 
 
 def json_template_input(current_data: dict):
@@ -20,6 +21,7 @@ def json_template_input(current_data: dict):
 
     product_input = current_data["product"]["input"]
     product_input["product_path"] = global_widgets["ety_product_input"].get()
+    product_input["bill_sum_path"] = global_widgets["ety_bill_sum_input"].get()
     stamp = product_input["stamp"]
     stamp["enable"] = global_dict_chk_var["_stamp_var"].get()
     stamp["path"] = global_widgets["ety_stamp"].get()
@@ -141,6 +143,7 @@ def json_template_output_product(current_data: dict):
 
 def render_input(current_data: dict):
     ety_product_input: Entry = global_widgets["ety_product_input"]
+    ety_bill_sum_input: Entry = global_widgets["ety_bill_sum_input"]
     ety_import: Entry = global_widgets["ety_import"]
     ety_sale_name: Entry = global_widgets["ety_sale_name"]
     ety_sale_account: Entry = global_widgets["ety_sale_account"]
@@ -187,6 +190,9 @@ def render_input(current_data: dict):
     ety_product_input.delete(0, END)
     ety_product_input.insert(END, product_input["product_path"])
 
+    ety_bill_sum_input.delete(0, END)
+    ety_bill_sum_input.insert(END, product_input["bill_sum_path"])
+
     stamp = product_input["stamp"]
     global_dict_chk_var["_stamp_var"].set(stamp["enable"])
     ety_stamp.delete(0, END)
@@ -203,6 +209,7 @@ def render_input(current_data: dict):
     ety_X_stamp_scale_product.insert(END, stamp_product["x_scale"])
     ety_Y_stamp_scale_product.delete(0, END)
     ety_Y_stamp_scale_product.insert(END, stamp_product["y_scale"])
+
 
     pass
 

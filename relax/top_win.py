@@ -100,16 +100,16 @@ def init_fr_top():
     btn_master_edit.grid(row=row_index, column=0)
 
     row_index += 1
-    lbl_supplier_name.grid(row=row_index, column=0, pady=(3, 0), sticky=E)
+    lbl_supplier_name.grid(row=row_index, column=0, pady=(2, 0), sticky=E)
     ety_supplier_name.grid(row=row_index, column=1)
 
     row_index += 1
-    lbl_output_path.grid(row=row_index, column=0, pady=(3, 0), sticky=E)
+    lbl_output_path.grid(row=row_index, column=0, pady=(2, 0), sticky=E)
     ety_output_path.grid(row=row_index, column=1, sticky=W)
     btn_output_path.grid(row=row_index, column=2)
 
     row_index += 1
-    chk_page_size.grid(row=row_index, column=0, pady=(3, 0), sticky=E)
+    chk_page_size.grid(row=row_index, column=0, pady=(2, 0), sticky=E)
     lbl_remark_2.grid(row=row_index, column=1, sticky=W)
     row_index += 1
     fr_0.grid(row=row_index, column=0, columnspan=4, padx=(36, 0), sticky=W)

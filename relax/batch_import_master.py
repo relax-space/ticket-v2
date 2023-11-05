@@ -3,7 +3,12 @@ from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
 from relax.read_excel_file import get_master_column_elec
 
-from relax.util import fill_zero_2, fill_zero_19, global_elec_hide_sheet, get_elec_hide_sheet
+from relax.util import (
+    fill_zero_2,
+    fill_zero_19,
+    global_elec_hide_sheet,
+    get_elec_hide_sheet,
+)
 from copy import deepcopy
 from os import path as os_path
 
@@ -103,7 +108,7 @@ def refactor_data(
                 row["G"],
                 row["I"],
                 "",
-                row["J"],
+                amt,
                 tax_percent,
                 "",
                 "",
@@ -134,8 +139,8 @@ def group_seq_no(break_list: list, header_list: list, product_list: list):
         else:
             slice_list.append(
                 (
-                    header_list[break_list[i - 1] + 1: v + 1],
-                    product_list[break_list[i - 1] + 1: v + 1],
+                    header_list[break_list[i - 1] + 1 : v + 1],
+                    product_list[break_list[i - 1] + 1 : v + 1],
                 )
             )
         pass
@@ -165,8 +170,8 @@ def make_one_import_sheet(
 
 def make_hidden_sheet(wb1: Workbook, hidden_sheet: list[dict]):
     for d in hidden_sheet:
-        ws1: Worksheet = wb1.add_worksheet(d['name'])
-        content_list = d['content']
+        ws1: Worksheet = wb1.add_worksheet(d["name"])
+        content_list = d["content"]
         for i, v in enumerate(content_list):
             ws1.write(i, 0, v)
         ws1.hide()
@@ -197,10 +202,8 @@ def make_one_import(
     s2 = deepcopy(sheet_header_dict["S2"])
     s3 = deepcopy(sheet_header_dict["S3"])
     s4 = deepcopy(sheet_header_dict["S4"])
-    make_one_import_sheet(wb1, header_list,
-                          sheet_names[0], s1, index=1)
-    make_one_import_sheet(wb1, product_list,
-                          sheet_names[1], s2, index=2)
+    make_one_import_sheet(wb1, header_list, sheet_names[0], s1, index=1)
+    make_one_import_sheet(wb1, product_list, sheet_names[1], s2, index=2)
     make_one_import_sheet(wb1, [], sheet_names[2], s3)
     make_one_import_sheet(wb1, [], sheet_names[3], s4)
 
@@ -242,8 +245,7 @@ def make_batch_import_elec(
         month,
         detail_max,
     )
-    break_list = group_seq_no_index(
-        calc_list, current_import["header_max"], detail_max)
+    break_list = group_seq_no_index(calc_list, current_import["header_max"], detail_max)
     seq_no_group_list = group_seq_no(break_list, header_list, product_list)
 
     sheet_name_str: str = current_import["sheet_names"]
@@ -255,7 +257,8 @@ def make_batch_import_elec(
     if not hidden_sheet:
         hidden_sheet = get_elec_hide_sheet()
     for i, v in enumerate(seq_no_group_list):
-        make_one_import(i, v, target_path, sheet_name_list,
-                        sheet_header_dict, hidden_sheet)
+        make_one_import(
+            i, v, target_path, sheet_name_list, sheet_header_dict, hidden_sheet
+        )
 
     return detail_count_over

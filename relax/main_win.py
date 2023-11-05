@@ -47,14 +47,14 @@ def init_view(root):
     fr_top_1.pack(padx=104, pady=(0, 10), side=TOP, fill=X)
 
     fr_input_sep_1 = Frame(root, height=2, borderwidth=1, relief="groove")
-    fr_input_sep_1.pack(side=TOP, fill=X, padx=3, pady=5)
+    fr_input_sep_1.pack(side=TOP, fill=X, padx=3, pady=2)
 
     ndb = Notebook(root)
     fr_product = Frame()
     fr_ticket = Frame()
     ndb.add(fr_product, text="商品清单")
     ndb.add(fr_ticket, text="发票清单")
-    ndb.pack(pady=5, expand=True, fill=BOTH)
+    ndb.pack(pady=1, expand=True, fill=BOTH)
 
     global_widgets["root"] = root
     global_widgets["fr_menu"] = fr_menu

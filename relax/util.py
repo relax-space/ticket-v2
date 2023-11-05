@@ -9,6 +9,7 @@ global_config_data = {
     'temp_product': '',
     'temp_cover': '',
     'temp_ticket': '',
+    'temp_zd': '',
     'temp_ticket_crop': '',
     'print': '',
     'import_list': '',
