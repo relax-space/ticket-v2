@@ -210,7 +210,6 @@ def render_input(current_data: dict):
     ety_Y_stamp_scale_product.delete(0, END)
     ety_Y_stamp_scale_product.insert(END, stamp_product["y_scale"])
 
-
     pass
 
 

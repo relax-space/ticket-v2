@@ -19,5 +19,3 @@ def json_data(current_data):
     json_top_data(current_data)
     json_product_data(current_data)
     json_ticket_data(current_data)
-
-

@@ -85,8 +85,9 @@ def init_fr_top():
 
     fr_0 = Frame(fr_top)
     lbl_page_size = Label(fr_0, text="尺寸表:")
-    btn1, img1 = render_tooltip(fr_0, 'asset/question.png',
-                                '只会读取excel的第一个sheet！', (15, 15))
+    btn1, img1 = render_tooltip(
+        fr_0, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
+    )
     ety_page_size = Entry(fr_0, width=60)
     btn_page_size = Button(fr_0, text="选择", command=page_size_click)
 

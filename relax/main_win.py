@@ -37,7 +37,6 @@ from relax.secret_win import init_secret, get_check_result, show_active_btn
 
 
 def init_view(root):
-
     fr_menu = Frame(root, width=180, relief=GROOVE, bd=1)
     fr_menu.pack(side=LEFT, fill=Y)
     fr_menu.pack_propagate(0)
@@ -122,7 +121,7 @@ def main_win_start():
     global_dict_chk_var["_import_var_option"] = StringVar()
 
     init_const()
-    global_config_data['is_actived'] = False
+    global_config_data["is_actived"] = False
     if not init_secret():
         return
 

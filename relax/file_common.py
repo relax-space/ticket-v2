@@ -57,9 +57,9 @@ def get_row_count(raw: str, max_china_per_row: int = 17) -> tuple[int, str]:
         break_list_count = len(break_list)
         for i, v in enumerate(break_list):
             if i == 0:
-                new_content += raw[0:v+1] + "\n"
+                new_content += raw[0 : v + 1] + "\n"
             else:
-                new_content += raw[break_list[i - 1]+1:v+1] + "\n"
+                new_content += raw[break_list[i - 1] + 1 : v + 1] + "\n"
 
         return row_count, new_content.strip()
 
@@ -119,7 +119,7 @@ def make_stamp(ws1: Worksheet, row_height_list: list, page_height: int, stamp: d
         i += 1
 
     # 保证最后一页，至少有两行数据
-    if break_list and row_count-1 == break_list[-1]:
+    if break_list and row_count - 1 == break_list[-1]:
         last_index = break_list.pop()
         break_list.append(last_index - 1)
 
@@ -253,8 +253,7 @@ def pdf_to_portrait(
                 (target_width - (left + right)) / page_width,
                 (target_height - (top + bottom)) / page_height,
             )
-            blank = pdf_write.add_blank_page(
-                width=target_width, height=target_height)
+            blank = pdf_write.add_blank_page(width=target_width, height=target_height)
             ty = target_height - page_height * scale_factor - top
             blank.merge_transformed_page(
                 page,

@@ -41,8 +41,7 @@ def make_import_one_nuonuo(
         new_row.append(df_tax["C"].values[0])
         new_row.append(is_tax_free)
         rows.append(new_row)
-    DataFrame(rows, columns=columns).to_excel(
-        target_path, startrow=0, index=False)
+    DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
     pass
 
 
@@ -83,8 +82,7 @@ def make_import_one_elec(
         new_row.append("")
         new_row.append(is_tax_free)
         rows.append(new_row)
-    DataFrame(rows, columns=columns).to_excel(
-        target_path, startrow=0, index=False)
+    DataFrame(rows, columns=columns).to_excel(target_path, startrow=0, index=False)
 
 
 def make_import_file(
@@ -100,12 +98,9 @@ def make_import_file(
     output_product = current_data["product"]["output"]
     import_list = output_product["import_list"]
 
-    product_path = os_path.join(
-        output_folder_path, global_config_data["temp_product"])
-    temp_cover = os_path.join(
-        output_folder_path, global_config_data["temp_cover"])
-    target_path = os_path.join(
-        output_folder_path, global_config_data["import_list"])
+    product_path = os_path.join(output_folder_path, global_config_data["temp_product"])
+    temp_cover = os_path.join(output_folder_path, global_config_data["temp_cover"])
+    target_path = os_path.join(output_folder_path, global_config_data["import_list"])
 
     product_title_str: str = output_product["product_detail"]["row4"]["contents"][0]
     product_title_str = product_title_str.replace("，", ",")

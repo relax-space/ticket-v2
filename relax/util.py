@@ -6,17 +6,17 @@ from datetime import date, datetime
 
 global_raw_data = []
 global_config_data = {
-    'temp_product': '',
-    'temp_cover': '',
-    'temp_ticket': '',
-    'temp_zd': '',
-    'temp_ticket_crop': '',
-    'print': '',
-    'import_list': '',
-    'url': '',
-    'expired': '',
-    'code': '',
-    'pwd': '',
+    "temp_product": "",
+    "temp_cover": "",
+    "temp_ticket": "",
+    "temp_zd": "",
+    "temp_ticket_crop": "",
+    "print": "",
+    "import_list": "",
+    "url": "",
+    "expired": "",
+    "code": "",
+    "pwd": "",
 }
 const_re = {
     "year": "@@@@",
@@ -111,7 +111,6 @@ def fill_zero_2(i: int) -> str:
 
 def fill_zero_19(i: int) -> str:
     return f"{i:0<19}"
-
 
 
 def get_unique_name(base_path: str, name: str, postfix: str, seq_no: int = 0) -> str:

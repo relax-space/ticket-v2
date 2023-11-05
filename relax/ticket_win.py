@@ -187,8 +187,7 @@ def ticket_create_click_raw(only_zd_list):
     if os_path.isdir(ticket_source_path):
         rmtree(ticket_source_path)
     if error_zd_list:
-        messagebox.showwarning(
-            "批量导入提示", f"发票提示：以下灶点未成功，建议使用个别生成：{error_zd_list}")
+        messagebox.showwarning("批量导入提示", f"发票提示：以下灶点未成功，建议使用个别生成：{error_zd_list}")
     else:
         result = messagebox.askquestion("提示", "成功，你需要打开文件夹吗？")
         if result == "yes":
@@ -233,13 +232,13 @@ def fr_special_zd(fr_special: Frame):
     fr_2 = Frame(fr_special)
     fr_2.pack(side=TOP, anchor=NW, padx=(70, 0))
     lbl_zd_title = Label(fr_2, text=f"灶点号:")
-    btn1, img1 = render_tooltip(fr_2, 'asset/question.png',
-                                '多个灶点用逗号分隔！', (15, 15))
+    btn1, img1 = render_tooltip(fr_2, "asset/question.png", "多个灶点用逗号分隔！", (15, 15))
     ety_ticket_zd_input = Entry(fr_2, width=60)
 
     def single_create_enter(e):
         single_create()
-    ety_ticket_zd_input.bind('<Return>', single_create_enter)
+
+    ety_ticket_zd_input.bind("<Return>", single_create_enter)
     btn_ticket_zd_input = Button(fr_2, text="个别生成", command=single_create)
 
     row_index = 0
@@ -270,8 +269,7 @@ def init_fr_ticket():
     fr_0 = Frame(fr_ticket_top)
     lbl_ticket_folder = Label(fr_0, text="发票文件夹：*", fg="red")
     ety_ticket_folder = Entry(fr_0, width=60)
-    btn_ticket_folder = Button(
-        fr_0, text="选择", command=ticket_folder_click)
+    btn_ticket_folder = Button(fr_0, text="选择", command=ticket_folder_click)
 
     lbl_ticket_folder.grid(row=0, column=0, sticky=E, padx=(49, 0))
     ety_ticket_folder.grid(row=0, column=2, padx=(10, 0))
@@ -283,8 +281,9 @@ def init_fr_ticket():
 
     fr_1 = Frame(fr_ticket_top)
     lbl_ticket_mapping = Label(fr_1, text="发票映射文件(xlsx):*", fg="red")
-    btn1, img1 = render_tooltip(fr_1, 'asset/question.png',
-                                '只会读取excel的第一个sheet！', (15, 15))
+    btn1, img1 = render_tooltip(
+        fr_1, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
+    )
     ety_ticket_mapping = Entry(fr_1, width=60)
     btn_ticket_mapping = Button(fr_1, text="选择", command=ticket_mapping_click)
 
@@ -296,8 +295,7 @@ def init_fr_ticket():
 
     fr_2 = Frame(fr_ticket_top)
     lbl_exclude_ticket_zd = Label(fr_2, text="排除灶点号:")
-    btn2, img1 = render_tooltip(fr_2, 'asset/question.png',
-                                '多个灶点用逗号分隔！', (15, 15))
+    btn2, img1 = render_tooltip(fr_2, "asset/question.png", "多个灶点用逗号分隔！", (15, 15))
     ety_exclude_ticket_zd = Entry(fr_2, width=60)
 
     lbl_exclude_ticket_zd.grid(row=0, column=0, sticky=E, padx=(46, 0))
@@ -324,8 +322,7 @@ def init_fr_ticket():
     fr_1.grid(row=row_index, column=0, sticky=W, pady=(3, 3), columnspan=3)
 
     row_index += 1
-    fr_2.grid(row=row_index, column=0, sticky=W,
-              pady=(3, 3), columnspan=3)
+    fr_2.grid(row=row_index, column=0, sticky=W, pady=(3, 3), columnspan=3)
 
     row_index += 1
     fr_special.grid(row=row_index, column=0, columnspan=3)
