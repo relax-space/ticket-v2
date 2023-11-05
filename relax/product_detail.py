@@ -251,8 +251,12 @@ def write_one_product(
     batch_size: dict,
     page_margin: dict,
 ):
+    zd_class = ""
+    if product_size_dict:
+        zd_class = product_size_dict[zd_no]["zd_class"] + "-"
+
     wb1 = Workbook(
-        os_path.join(output_folder_path, f"{zd_no}.xlsx"),
+        os_path.join(output_folder_path, f"{zd_class}{zd_no}.xlsx"),
         options={
             "strings_to_numbers": True,
             "constant_memory": True,

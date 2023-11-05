@@ -6,7 +6,7 @@
         "output_path": "",
         "batch_size": {
             "enable": true,
-            "column_name": "客户id,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
+            "column_name": "客户id,分区灶点,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
             "path": "",
             "page_height_A4": 830,
             "page_height_A5": 380
@@ -366,8 +366,8 @@
         },
         "ticket": {
             "mapping": {
-                "ticket_path":"",
-                "mapping_path":"",
+                "ticket_path": "",
+                "mapping_path": "",
                 "column_name": "数电票号码,销方名称,开票日期,备注",
                 "column_sep": ",",
                 "date_format": "%Y-%m-%d %H:%M:%S",
@@ -391,7 +391,7 @@
         "output_path": "",
         "batch_size": {
             "enable": true,
-            "column_name": "客户id,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
+            "column_name": "客户id,分区灶点,开票抬头,税号,发票备注,发票打印大小,发票打印方向,发票份数,筹措清单打印大小,筹措清单份数",
             "path": "",
             "page_height_A4": 830,
             "page_height_A5": 380
@@ -751,8 +751,8 @@
         },
         "ticket": {
             "mapping": {
-                "ticket_path":"",
-                "mapping_path":"",
+                "ticket_path": "",
+                "mapping_path": "",
                 "column_name": "数电票号码,销方名称,开票日期,备注",
                 "column_sep": ",",
                 "date_format": "%Y-%m-%d %H:%M:%S",

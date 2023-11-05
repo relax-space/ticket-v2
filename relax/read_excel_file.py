@@ -135,17 +135,18 @@ def get_page_size_list(
     use_column_str = use_column_str.replace("，", ",")
     usecols = use_column_str.split(",")
     df = read_excel(
-        size_path, usecols=usecols, dtype={usecols[0]: str, usecols[5]: str}
+        size_path, usecols=usecols, dtype={usecols[0]: str, usecols[6]: str}
     )
-    # 客户id-A, 开票抬头-B, 税号-C, 发票备注-D, 发票打印大小-E, 发票打印方向-F, 发票份数-G, 筹措清单打印大小-H, 筹措清单份数-I
-    df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+    # 客户id-A,分区灶点-J, 开票抬头-B, 税号-C, 发票备注-D, 发票打印大小-E, 发票打印方向-F, 发票份数-G, 筹措清单打印大小-H, 筹措清单份数-I
+    df.columns = ["A", "J", "B", "C", "D", "E", "F", "G", "H", "I"]
     zd_set = set()
     product_size_dict = {}
     ticket_size_dict = {}
-    df.dropna(subset=["A", "B", "D", "E", "G", "H", "I"], inplace=True)
+    df.dropna(subset=["A", "J", "B", "D", "E", "G", "H", "I"], inplace=True)
     df["C"].fillna("", inplace=True)
     for _, v in df.iterrows():
         zd = v["A"]
+        zd_class = v["J"]
         title = v["B"]
         tax_no = v["C"]
         remark = replace_ymd(v["D"])
@@ -160,6 +161,7 @@ def get_page_size_list(
                 continue
         product_size_dict[zd] = {
             "zd": zd,
+            "zd_class": zd_class,
             "page_size": p2_size,
             "page_quantity": p2_quantity,
             "title": title,
@@ -168,6 +170,7 @@ def get_page_size_list(
         }
         ticket_size_dict[zd] = {
             "zd": zd,
+            "zd_class": zd_class,
             "page_size": p1_size,
             "page_orient": p1_orient,
             "page_quantity": p1_quantity,

@@ -80,6 +80,7 @@ def move_ticket_with_quantity(
             zd,
             zd_size_dict["page_size"],
             zd_size_dict["page_quantity"],
+            zd_size_dict["zd_class"],
             os_path.join(ticket_folder_path, i),
             target_path,
             order_mark,

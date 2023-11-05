@@ -149,6 +149,7 @@ def make_print_file_one(
     zd: str,
     page_size: str,
     page_quantity: int,
+    zd_class: str,
     source_path: str,
     target_path: str,
     order_mark: str,
@@ -157,7 +158,9 @@ def make_print_file_one(
     zd_seq: int = 1,
 ):
     for i in range(page_quantity):
-        target_name = callback(zd, i, order_mark, page_size, postfix, zd_seq)
+        target_name = callback(
+            f"{zd_class}-{zd}", i, order_mark, page_size, postfix, zd_seq
+        )
         target_path_name = os_path.join(target_path, target_name)
         copyfile(source_path, target_path_name)
 

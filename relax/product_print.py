@@ -23,11 +23,13 @@ def make_print_file_all(
         zd = v["zd"]
         page_size = v["page_size"]
         page_quantity = v["page_quantity"]
-        source_file_path = os_path.join(source_path, f"{zd}.{postfix}")
+        zd_class = v["zd_class"]
+        source_file_path = os_path.join(source_path, f"{zd_class}-{zd}.{postfix}")
         make_print_file_one(
             zd,
             page_size,
             page_quantity,
+            zd_class,
             source_file_path,
             target_path,
             order_mark,
