@@ -33,6 +33,7 @@ global_dict_chk_var = {
     "_import_var_option": "",
     "_active_msg_var": "",
     "_error_msg_var": "",
+    "_merge_same_product_var": "",
 }
 
 global_active_obj = {

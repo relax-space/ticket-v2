@@ -99,7 +99,6 @@ def make_import_file(
     import_list = output_product["import_list"]
 
     product_path = os_path.join(output_folder_path, global_config_data["temp_product"])
-    temp_cover = os_path.join(output_folder_path, global_config_data["temp_cover"])
     target_path = os_path.join(output_folder_path, global_config_data["import_list"])
 
     product_title_str: str = output_product["product_detail"]["row4"]["contents"][0]

@@ -11,13 +11,17 @@ def json_template_input(current_data: dict):
     import_list["default_value"] = v
 
     current_import = import_list[v]
-    current_import["sale_name"] = global_widgets["ety_sale_name"].get()
-    current_import["sale_account"] = global_widgets["ety_sale_account"].get()
-    current_import["exclude_zd"] = global_widgets["ety_exclude_zd"].get()
-    header_max = global_widgets["ety_header_max"].get()
-    detail_max = global_widgets["ety_detail_max"].get()
-    current_import["header_max"] = int(header_max) if header_max else ""
-    current_import["detail_max"] = int(detail_max) if detail_max else ""
+    if "sale_name" in current_import:
+        current_import["sale_name"] = global_widgets["ety_sale_name"].get()
+        current_import["sale_account"] = global_widgets["ety_sale_account"].get()
+        current_import["exclude_zd"] = global_widgets["ety_exclude_zd"].get()
+        current_import["is_merge"] = global_dict_chk_var[
+            "_merge_same_product_var"
+        ].get()
+        header_max = global_widgets["ety_header_max"].get()
+        detail_max = global_widgets["ety_detail_max"].get()
+        current_import["header_max"] = int(header_max) if header_max else ""
+        current_import["detail_max"] = int(detail_max) if detail_max else ""
 
     product_input = current_data["product"]["input"]
     product_input["product_path"] = global_widgets["ety_product_input"].get()
@@ -165,26 +169,28 @@ def render_input(current_data: dict):
     v = import_list["default_value"]
     global_dict_chk_var["_import_var_option"].set(v)
     current_import = import_list[v]
-    sale_name = current_import.get("sale_name")
-    sale_account = current_import.get("sale_account")
-    exclude_zd = current_import.get("exclude_zd")
-    header_max = current_import.get("header_max")
-    detail_max = current_import.get("detail_max")
-    if sale_name:
+    if "sale_name" in current_import:
+        sale_name = current_import.get("sale_name")
         ety_sale_name.delete(0, END)
         ety_sale_name.insert(END, sale_name)
-    if sale_account:
+
+        sale_account = current_import.get("sale_account")
         ety_sale_account.delete(0, END)
         ety_sale_account.insert(END, sale_account)
-    if exclude_zd:
+
+        exclude_zd = current_import.get("exclude_zd")
         ety_exclude_zd.delete(0, END)
         ety_exclude_zd.insert(END, exclude_zd)
-    if header_max:
+
+        header_max = current_import.get("header_max")
         ety_header_max.delete(0, END)
         ety_header_max.insert(END, header_max)
-    if detail_max:
+
+        detail_max = current_import.get("detail_max")
         ety_detail_max.delete(0, END)
         ety_detail_max.insert(END, detail_max)
+
+        global_dict_chk_var["_merge_same_product_var"].set(current_import["is_merge"])
 
     product_input = current_data["product"]["input"]
     ety_product_input.delete(0, END)

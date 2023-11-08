@@ -358,6 +358,7 @@
                         "sale_name": "",
                         "sale_account": "",
                         "exclude_zd": "",
+                        "is_merge": false,
                         "header_max": 100,
                         "detail_max": 5000
                     }
@@ -743,6 +744,7 @@
                         "sale_name": "",
                         "sale_account": "",
                         "exclude_zd": "",
+                        "is_merge": false,
                         "header_max": 100,
                         "detail_max": 5000
                     }

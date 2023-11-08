@@ -53,10 +53,10 @@ def get_ticket_zd_list(ticket_folder: str, sep: str) -> tuple[set, set]:
     zd_special_set = set()
     for i in file_list:
         if sep in i:
-            zd = i.lstrip(sep, 1)[0]
+            zd = i.split(sep, 1)[0]
             zd_special_set.add(zd)
             continue
-        zd = i.lstrip(".", 1)[0]
+        zd = i.split(".", 1)[0]
         zd_set.add(zd)
     return zd_set, zd_special_set
 

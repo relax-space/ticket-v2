@@ -36,6 +36,18 @@ def group_seq_no_index(calc_list: list, header_max: int, detail_max: int):
     return break_list
 
 
+def get_tax_no(df_tax: DataFrame, prod: str):
+    is_has = False
+    for _, row_tax in df_tax.iterrows():
+        if row_tax["A"] == prod:
+            tax_percent = row_tax["B"]
+            tax_code = fill_zero_19(row_tax["C"])
+            is_has = True
+            return tax_percent, tax_code, is_has
+    if not is_has:
+        return 0, "", False
+
+
 def refactor_data(
     key_set: set,
     product_size_dict: dict,
@@ -44,7 +56,6 @@ def refactor_data(
     current_import: dict,
     year: int,
     month: int,
-    detail_max: int,
 ):
     sale_name = current_import["sale_name"]
     sale_account = current_import["sale_account"]
@@ -55,12 +66,12 @@ def refactor_data(
     # 发票流水号-A,项目名称-B,商品和服务税收编码-C,规格型号-D,单位-E,数量-F,单价-G,金额-H,税率-I,折扣金额-J,是否使用优惠政策-K,优惠政策类型-L,即征即退类型-M
     product_list: list = []
     calc_list: list = []
-    detail_count_over = []
+    miss_tax_list = []
+    is_continue = True
     for v in key_set:
         df = df_raw.loc[df_raw["C"] == v]
-        product_count = 0
         zd_dict = product_size_dict[v]
-        seq_no = f"{v}{year}{month}"
+        seq_no = f"{v}-{year}{month}"
         # 共17列
         header_row = [
             seq_no,
@@ -82,23 +93,26 @@ def refactor_data(
             "是",
         ]
         product_sub_list: list = []
+        product_count = 0
         is_tax = 0
         for _, row in df.iterrows():
             prod = row["E"]
             tax_code = ""
             tax_percent = 0
-            for _, row_tax in df_tax.iterrows():
-                if row_tax["A"] == prod:
-                    tax_percent = row_tax["B"]
-                    tax_code = fill_zero_19(row_tax["C"])
-                    product_count += 1
-                    break
+            tax_percent, tax_code, is_has = get_tax_no(df_tax, prod)
+            if not is_has:
+                miss_tax_list.append(prod)
+                is_continue = False
+                continue
+            if not is_continue:
+                continue
             is_tax_free = "" if tax_percent else "免税"
             if tax_percent:
                 is_tax += 1
             amt = row["J"]
             if not amt:
                 continue
+            product_count += 1
             # 共13列
             product_row = [
                 seq_no,
@@ -117,14 +131,11 @@ def refactor_data(
             ]
             product_sub_list.append(product_row)
         header_row[3] = "是" if is_tax else "否"
-        if product_count > detail_max:
-            detail_count_over.append(v)
-            continue
-        calc_list.append((v, product_count))
+        calc_list.append((seq_no, product_count))
         header_list.append(header_row)
         product_list.append(product_sub_list)
 
-    return header_list, product_list, calc_list, detail_count_over
+    return header_list, product_list, calc_list, miss_tax_list
 
 
 def group_seq_no(break_list: list, header_list: list, product_list: list):
@@ -216,6 +227,72 @@ def make_one_import(
     pass
 
 
+def merge_same_product(product_list: list):
+    dict_calc: dict = {}
+    new_product_list = []
+    for sub_list in product_list:
+        key_calc = sub_list[0][0] if sub_list and sub_list[0] else ""
+        dict_calc[key_calc] = 0
+        dict_zd_prod_merge = {}
+        for a, b, c, d, e, f, g, h, i, j, k, l, m in sub_list:
+            key = f"{b}||{e}"
+            if key not in dict_zd_prod_merge:
+                dict_zd_prod_merge[key] = [a, b, c, d, e, f, g, h, i, j, k, l, m]
+                dict_calc[key_calc] += 1
+            else:
+                old = dict_zd_prod_merge[key]
+                dict_zd_prod_merge[key] = [
+                    a,
+                    b,
+                    c,
+                    d,
+                    e,
+                    f + old[5],
+                    g,
+                    h + old[7],
+                    i,
+                    j,
+                    k,
+                    l,
+                    m,
+                ]
+        new_product_list.append(list(dict_zd_prod_merge.values()))
+    calc_list = [(seq, count) for seq, count in dict_calc.items()]
+
+    return new_product_list, calc_list
+
+
+def remove_from_cover_product(header_list, product_list, calc_list, detail_max):
+    calc_index_list = []
+    header_index_list = []
+    product_index_list = []
+    detail_count_over = []
+    for index, value in enumerate(calc_list):
+        seq, count = value
+        if count > detail_max:
+            calc_index_list.append(index)
+            detail_count_over.append(seq.split("-", 1)[0])
+            for i, v in enumerate(header_list):
+                if v[0] == seq:
+                    header_index_list.append(i)
+            for i, sub_list in enumerate(product_list):
+                if (not sub_list) or (not sub_list[0]):
+                    continue
+                if sub_list[0][0] == seq:
+                    product_index_list.append(i)
+    new_calc_list = [
+        calc_list[i] for i in range(len(calc_list)) if i not in calc_index_list
+    ]
+    new_header_list = [
+        header_list[i] for i in range(len(header_list)) if i not in header_index_list
+    ]
+    new_product_list = [
+        product_list[i] for i in range(len(product_list)) if i not in product_index_list
+    ]
+    return new_calc_list, new_header_list, new_product_list, detail_count_over
+    pass
+
+
 def make_batch_import_elec(
     target_path: str,
     key_set: set,
@@ -227,6 +304,7 @@ def make_batch_import_elec(
     month: int,
 ):
     exclude_zd_str: str = current_import["exclude_zd"]
+    is_merge = current_import["is_merge"]
     include_zd_list = []
     exclude_zd_str = exclude_zd_str.replace("，", ",")
     exclude_list = exclude_zd_str.split(",")
@@ -235,7 +313,12 @@ def make_batch_import_elec(
             continue
         include_zd_list.append(v)
     detail_max = current_import["detail_max"]
-    header_list, product_list, calc_list, detail_count_over = refactor_data(
+    (
+        header_list,
+        product_list,
+        calc_list,
+        miss_tax_list,
+    ) = refactor_data(
         include_zd_list,
         product_size_dict,
         df_raw,
@@ -243,8 +326,18 @@ def make_batch_import_elec(
         current_import,
         year,
         month,
-        detail_max,
     )
+    if miss_tax_list:
+        return {"miss_tax_list": miss_tax_list, "detail_count_over": None}
+
+    if is_merge:
+        product_list, calc_list = merge_same_product(product_list)
+        pass
+
+    calc_list, header_list, product_list, detail_count_over = remove_from_cover_product(
+        header_list, product_list, calc_list, detail_max
+    )
+
     break_list = group_seq_no_index(calc_list, current_import["header_max"], detail_max)
     seq_no_group_list = group_seq_no(break_list, header_list, product_list)
 
@@ -261,4 +354,4 @@ def make_batch_import_elec(
             i, v, target_path, sheet_name_list, sheet_header_dict, hidden_sheet
         )
 
-    return detail_count_over
+    return {"miss_tax_list": miss_tax_list, "detail_count_over": detail_count_over}

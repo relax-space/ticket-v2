@@ -434,7 +434,7 @@ def create_click_raw(only_zd_list: list):
     t5 = time()
     detail_count_over = []
     if is_import:
-        detail_count_over = make_import_file(
+        result_import_dict = make_import_file(
             current_data,
             output_folder_path,
             df_taxs,
@@ -444,6 +444,16 @@ def create_click_raw(only_zd_list: list):
             year,
             month,
         )
+        if result_import_dict:
+            miss_tax_list = result_import_dict["miss_tax_list"]
+            detail_count_over = result_import_dict["detail_count_over"]
+            if miss_tax_list:
+                messagebox.showwarning(
+                    "批量导入提示",
+                    f"批量导入失败：以下商品在税率表无法找到，请更新后重新生成，{miss_tax_list}",
+                )
+                return
+
     t6 = time()
     print(
         get_runtime(t1, t2),
@@ -603,7 +613,7 @@ def fr_top_3(fr_product_top):
 
     def rdo_click_1():
         fr_batch_info: Frame = global_widgets["fr_batch_info"]
-        fr_batch_info.grid(row=4, column=0, sticky=W)
+        fr_batch_info.grid(row=6, column=0, sticky=W)
         pass
 
     def rdo_click_2():
@@ -683,12 +693,16 @@ def fr_top_5(fr_product_top):
     fr_1 = Frame(fr_batch_info)
     lbl_exclude_zd = Label(fr_1, text="排除灶点号:")
     btn2, img1 = render_tooltip(fr_1, "asset/question.png", "多个灶点用逗号分隔！", (15, 15))
-    ety_exclude_zd = Entry(fr_1, width=60)
+    ety_exclude_zd = Entry(fr_1, width=25)
+    chk_merge_same_product = Checkbutton(
+        fr_1, text="是否合并相同的商品", variable=global_dict_chk_var["_merge_same_product_var"]
+    )
 
     lbl_exclude_zd.grid(row=0, column=0, sticky=E, padx=(34, 0), pady=(3, 0))
     btn2.grid(row=0, column=1)
     btn2.image = img1
     ety_exclude_zd.grid(row=0, column=2, padx=(2, 0), pady=(3, 0))
+    chk_merge_same_product.grid(row=0, column=3, padx=(2, 0), pady=(3, 0))
 
     fr_2 = Frame(fr_batch_info)
     lbl_total = Label(fr_2, text="行数限制：")
@@ -713,6 +727,7 @@ def fr_top_5(fr_product_top):
     global_widgets["ety_header_max"] = ety_header_max
     global_widgets["ety_detail_max"] = ety_detail_max
     global_widgets["fr_batch_info"] = fr_batch_info
+    global_widgets["chk_merge_same_product"] = chk_merge_same_product
 
     return fr_batch_info
 
@@ -1021,9 +1036,9 @@ def fr_bottom(fr_product_bottom: Frame):
     fr_product_bottom_3 = Frame(fr_product_bottom, height=80)
     fr_product_bottom_3.pack(side=TOP, anchor=NW)
 
-    fr_cover(fr_product_bottom_1)
-    fr_product(fr_product_bottom_2)
-    fr_special_zd(fr_product_bottom_3)
+    fr_special_zd(fr_product_bottom_1)
+    fr_cover(fr_product_bottom_2)
+    fr_product(fr_product_bottom_3)
 
     pass
 

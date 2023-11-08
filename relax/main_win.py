@@ -111,13 +111,14 @@ def main_win_start():
     create_folder()
 
     root = Tk()
-    root.title("发票清单-部队")
+    root.title("发票清单-部队 V1.3")
 
     center_window(root, 1024, 768)
     global_widgets["root"] = root
     global_dict_chk_var["_import_var"] = BooleanVar()
     global_dict_chk_var["_page_size_var"] = BooleanVar()
     global_dict_chk_var["_stamp_var"] = BooleanVar()
+    global_dict_chk_var["_merge_same_product_var"] = BooleanVar()
     global_dict_chk_var["_import_var_option"] = StringVar()
 
     init_const()
