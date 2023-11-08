@@ -291,8 +291,8 @@ def create_click_raw(only_zd_list: list):
 
     lst_menu: Listbox = global_widgets["lst_menu"]
     ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
-    ety_bill_check_input: Entry= global_widgets["ety_bill_check_input"]
-    
+    ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
+
     key = lst_menu.get(lst_menu.curselection()[0])
     current_data = get_current_data(key)
     json_data(current_data)
@@ -352,11 +352,14 @@ def create_click_raw(only_zd_list: list):
             return
     incorrect_zd_set = check_bill(df_bill, df)
     if incorrect_zd_set:
-        correct_zd_path = os_path.join(output_folder_path, global_config_data["temp_zd"])
+        correct_zd_path = os_path.join(
+            output_folder_path, global_config_data["temp_zd"]
+        )
         if not os_path.isdir(correct_zd_path):
             makedirs(correct_zd_path)
         correct_zd_path = os_path.abspath(correct_zd_path)
         ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
+        ety_bill_check_input.config(state="normal")
         ety_bill_check_input.delete(0, END)
         ety_bill_check_input.insert(END, correct_zd_path)
         ety_bill_check_input.config(state="readonly")

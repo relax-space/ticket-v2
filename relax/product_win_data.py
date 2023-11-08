@@ -210,6 +210,11 @@ def render_input(current_data: dict):
     ety_Y_stamp_scale_product.delete(0, END)
     ety_Y_stamp_scale_product.insert(END, stamp_product["y_scale"])
 
+    ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
+    ety_bill_check_input.config(state="normal")
+    ety_bill_check_input.delete(0, END)
+    ety_bill_check_input.config(state="readonly")
+
     pass
 
 
