@@ -3,6 +3,8 @@ from os import path as os_path
 from time import strftime, gmtime
 from datetime import date, datetime
 
+from relax.util_request import get_current_date
+
 
 global_raw_data = []
 global_config_data = {
@@ -42,7 +44,7 @@ global_active_obj = {
     "is_enable": False,
     "expired": "",
 }
-global_check_result = ["1", ""]
+global_check_result = ["is_actived", "expired", "is_code", "code", "today"]
 global_elec_hide_sheet = []
 
 
@@ -140,3 +142,14 @@ def check_file_date(file_name) -> int:
     now_date = date.today()
     res = now_date - file_date
     return res.days
+
+
+def check_date(return_list):
+    urls = global_config_data["urls"]
+    network_d = get_current_date(urls)
+    local_d = date.today()
+    if network_d != local_d:
+        return_list[4] = network_d
+        return False, network_d
+    return_list[4] = ""
+    return True, network_d

@@ -111,7 +111,7 @@ def main_win_start():
     create_folder()
 
     root = Tk()
-    root.title("发票清单-部队 V1.3")
+    root.title("发票清单-部队 V1.4")
 
     center_window(root, 1024, 768)
     global_widgets["root"] = root

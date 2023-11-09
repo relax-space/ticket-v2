@@ -3,9 +3,12 @@ from hashlib import md5
 from datetime import date, timedelta
 import os
 import sys
+
+sys.coinit_flags = 0
 from random import randint
 from threading import Thread
 from gmssl import sm3, func
+import pythoncom
 
 
 def fill_zero2(i: int) -> str:
@@ -55,27 +58,37 @@ def sm3_encrypto(raw: str) -> str:
 
 class SecretWin:
     def __init__(self):
-        self.w = WMI()
         self.DAY = "webqmrbufyybfixtdpuqwgpkapqknhgabdzbowkgceuiorlznjzglm"
         self.list = ["", "", ""]
         pass
 
-    def _get_cpu(self) -> str:
+    def _get_unique_no(self) -> str:
+        pythoncom.CoInitialize()
         try:
-            return self.w.Win32_processor()[0].ProcessorId.strip()
+            w = WMI()
+            cpu = w.Win32_processor()[0].ProcessorId.strip()
+            disk = w.Win32_DiskDrive()[0].SerialNumber.strip()
+            return f"{cpu}{disk}"
         except Exception as e:
-            return str(e)
-
-    def _get_disk(self) -> str:
-        for disk in self.w.Win32_DiskDrive():
-            return disk.SerialNumber
+            print(e)
+            return ""
+        finally:
+            pythoncom.CoUninitialize()
 
     def get_code(self) -> str:
-        code = f"relax{self._get_cpu()}{self._get_disk()}"
+        unique_no = self._get_unique_no()
+        if not unique_no:
+            return ""
+        code = f"relax{unique_no}"
         last = "b"
         code_md5 = md5(code.encode()).hexdigest().lower()
         new_code = code_md5[:-1] + last
         return new_code
+
+    def get_code_thread(self, check_result: list):
+        check_result[3] = self.get_code()
+        check_result[2] = True
+        return True
 
     def _get_pwd_1(self, lst: list, code, year: int, month: int, day: int) -> str:
         month_2 = fill_zero2(month)
@@ -129,38 +142,31 @@ class SecretWin:
         )
 
     def check_pwd(self, check_result: list, code, pwd):
+        check_result[0] = False
+        check_result[1] = None
+        if not code:
+            return False, None
+
         if len(pwd) != 32:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
 
         year = str_to_int(pwd[0:4])
         if year == 0:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
         month = str_to_int(pwd[4:6])
         if month == 0:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
         day_str = pwd[6:12]
         day = self.DAY.find(day_str)
         if day == -1:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
 
         act_pwd = self.get_pwd(code, year, month, day)
         if act_pwd != pwd:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
         act_date = date(year, month, day)
         now = date.today()
         if act_date < now:
-            check_result[0] = False
-            check_result[1] = None
             return False, None
         expired = act_date.strftime("%Y-%m-%d")
         check_result[0] = True

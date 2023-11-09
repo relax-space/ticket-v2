@@ -27,6 +27,7 @@ from relax.util import (
     global_widgets,
     global_dict_chk_var,
     global_config_data,
+    global_check_result,
 )
 from relax.win_data import json_data
 from os import makedirs, path as os_path, startfile as os_startfile
@@ -112,6 +113,21 @@ def create_click_valid():
 
 
 def ticket_create_click_raw(only_zd_list):
+    is_code = global_check_result[2]
+    if not is_code:
+        messagebox.showwarning(
+            "警告",
+            f"您的账号疑似被盗，请重新激活！",
+        )
+        return
+
+    network_d = global_check_result[4]
+    if network_d:
+        messagebox.showwarning(
+            "警告",
+            f"产品不可用，请先将电脑时间设置正确,正确日期是：{network_d}！",
+        )
+        return
     if not create_click_valid():
         return
     lst_menu: Listbox = global_widgets["lst_menu"]

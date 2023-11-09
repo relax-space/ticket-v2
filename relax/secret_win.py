@@ -1,6 +1,7 @@
 from relax.util_request import get_current_date
 from datetime import date
 from relax.util import (
+    check_date,
     check_file_date,
     global_check_result,
     update_const,
@@ -26,56 +27,49 @@ from threading import Thread
 from relax.util_win import center_window
 
 
-def check_network_date(urls: list):
-    success = False
-    network_d = get_current_date(urls)
-    local_d = date.today()
-    if network_d != local_d:
-        return False
-    return True
-
-
-def win_date_check(urls):
-    root = global_widgets["root"]
-    success = check_network_date(urls)
-    if not success:
-        lbl_msg = Label(
-            root, text="产品不可用，请先将电脑时间设置正确！", fg="red", font=font.Font(size=20)
-        )
-        lbl_msg.pack(pady=20)
-        root.mainloop()
-        return False
-    return True
-
-
 def init_key():
     sw = SecretWin()
     code = global_config_data["code"]
     pwd = global_config_data["pwd"]
-    if not code:
-        code = sw.get_code()
-        global_config_data["code"] = code
-    elif code[:-1] != sw.get_code()[:-1]:
-        global_check_result[0] = False
-        global_check_result[1] = None
-        return False, None
     th1 = Thread(target=sw.check_pwd, args=(global_check_result, code, pwd))
     th1.daemon = True
     th1.start()
-    return True
+
+    th2 = Thread(target=sw.get_code_thread, args=(global_check_result,))
+    th2.daemon = True
+    th2.start()
+
+    th3 = Thread(target=check_date, args=(global_check_result,))
+    th3.daemon = True
+    th3.start()
 
 
 def get_check_result(wait_seconds: int = 60):
     while wait_seconds > 0:
-        if global_check_result[0] == "1":
+        if global_check_result[0] == "is_actived":
             wait_seconds -= 1
             sleep(1)
             continue
         else:
             global_config_data["is_actived"] = global_check_result[0]
             global_config_data["expired"] = global_check_result[1]
-            return global_check_result
-    return None
+            break
+    while wait_seconds > 0:
+        if global_check_result[2] == "is_code":
+            wait_seconds -= 1
+            sleep(1)
+            continue
+        else:
+            global_config_data["code"] = global_check_result[3]
+            break
+    while wait_seconds > 0:
+        if global_check_result[4] == "today":
+            wait_seconds -= 1
+            sleep(1)
+            continue
+        else:
+            break
+    return global_check_result
 
 
 def is_actived():
@@ -199,11 +193,7 @@ def init_menu_activer():
 
 
 def init_secret():
-    urls = global_config_data["urls"]
-    if not win_date_check(urls):
-        return False
-    if not init_key():
-        return False
+    init_key()
     init_menu_activer()
     return True
     pass
