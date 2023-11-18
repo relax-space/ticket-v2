@@ -11,6 +11,7 @@ from relax.product_detail import write_all_product
 from relax.product_import import make_import_file
 from relax.read_excel_file import (
     get_all_tax,
+    re_calc_sum,
     read_bill_sum,
     read_one_product,
     read_all_product,
@@ -348,6 +349,8 @@ def create_click_raw(only_zd_list: list):
     if only_zd_list:
         df = df[df["C"].isin(only_zd_list)]
     df_set = set(df["C"].values)
+
+    re_calc_sum(df, df_set)
 
     bill_sum_path: str = product_input["bill_sum_path"]
     df_bill = read_bill_sum(bill_sum_path)

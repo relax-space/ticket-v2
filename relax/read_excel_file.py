@@ -28,7 +28,7 @@ def read_one_product(
     #     "商品名称": "E",              => 商品名称
     #     "单价（元）": "F",            => 单价
     #     "计量单位": "G",              => 计量单位
-    #     "收验货单总金额（元）": "H",   => 小计
+    #     "收验货单总金额（元）": "H",   => 小计（这个不靠谱，已经通过J列重新计算）
     #     "数量": "I",                  => 数量
     #     "小计（元）": "J",            => 金额
     #     "报账单编号": "K",
@@ -46,6 +46,27 @@ def read_one_product(
     #     金额：收验货单信息:小计（元）
     #     小计：收验货单信息:收验货单总金额（元）
     #    本账单合计：支付信息:报账金额（元）
+
+
+def re_calc_sum(df_raw: DataFrame, key_set: set):
+    for v in key_set:
+        df = df_raw.loc[df_raw["C"] == v]
+        date_dict = {}
+        amt_sum = 0
+        for _, row in df.iterrows():
+            date = row["B"]
+            amt = row["J"]
+            if date not in date_dict:
+                date_dict[date] = amt
+            else:
+                date_dict[date] += amt
+            amt_sum += amt
+        for i, row in df.iterrows():
+            date = row["B"]
+            df_raw.at[i, "H"] = round(date_dict[date], 2)
+            df_raw.at[i, "M"] = round(amt_sum, 2)
+
+    pass
 
 
 def read_all_product(product_path, usecols_str, column_sep_1, column_sep_2):
