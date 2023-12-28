@@ -25,7 +25,9 @@ def json_template_input(current_data: dict):
 
     product_input = current_data["product"]["input"]
     product_input["product_path"] = global_widgets["ety_product_input"].get()
+    product_input["is_bill_sum"] = global_dict_chk_var["_is_bill_sum_var"].get()
     product_input["bill_sum_path"] = global_widgets["ety_bill_sum_input"].get()
+    product_input["is_bill_list"] = global_dict_chk_var["_is_bill_list_var"].get()
     stamp = product_input["stamp"]
     stamp["enable"] = global_dict_chk_var["_stamp_var"].get()
     stamp["path"] = global_widgets["ety_stamp"].get()
@@ -196,8 +198,12 @@ def render_input(current_data: dict):
     ety_product_input.delete(0, END)
     ety_product_input.insert(END, product_input["product_path"])
 
+    global_dict_chk_var["_is_bill_sum_var"].set(product_input["is_bill_sum"])
+
     ety_bill_sum_input.delete(0, END)
     ety_bill_sum_input.insert(END, product_input["bill_sum_path"])
+
+    global_dict_chk_var["_is_bill_list_var"].set(product_input["is_bill_list"])
 
     stamp = product_input["stamp"]
     global_dict_chk_var["_stamp_var"].set(stamp["enable"])

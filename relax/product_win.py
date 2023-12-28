@@ -55,7 +55,7 @@ from tkinter import (
 )
 from relax.win_data import json_data
 from time import time
-from relax.util_win import center_window, render_tooltip
+from relax.util_win import center_window, render_tooltip, show_Toplevel
 from relax.product_check import check_bill, update_raw_df
 
 
@@ -153,21 +153,6 @@ def bill_click():
     pass
 
 
-def check_bill_click():
-    lst_menu: Listbox = global_widgets["lst_menu"]
-    if not lst_menu.curselection():
-        messagebox.showinfo("提示", "请先在左边选择一个模板")
-        return
-
-    file_path = filedialog.askdirectory()
-    if not file_path:
-        return
-    ety_bill_sum_input: Entry = global_widgets["ety_bill_sum_input"]
-    ety_bill_sum_input.delete(0, END)
-    ety_bill_sum_input.insert(0, file_path)
-    pass
-
-
 def create_click_valid():
     lst_menu: Listbox = global_widgets["lst_menu"]
     ety_supplier_name: Entry = global_widgets["ety_supplier_name"]
@@ -204,10 +189,12 @@ def create_click_valid():
         messagebox.showwarning("警告", "灶点商品销售一览表不能为空！")
         ety_product_input.focus_set()
         return False
-    elif not ety_bill_sum_input.get():
-        messagebox.showwarning("警告", "灶点一览表不能为空！")
-        ety_bill_sum_input.focus_set()
-        return False
+
+    if global_dict_chk_var["_is_bill_sum_var"].get():
+        if not ety_bill_sum_input.get():
+            messagebox.showwarning("警告", "灶点一览表不能为空！")
+            ety_bill_sum_input.focus_set()
+            return False
 
     if global_dict_chk_var["_import_var"].get():
         if not ety_import.get():
@@ -302,8 +289,6 @@ def create_click_raw(only_zd_list: list):
         )
         return
 
-    t1 = time()
-
     if not create_click_valid():
         return
 
@@ -352,43 +337,40 @@ def create_click_raw(only_zd_list: list):
 
     re_calc_sum(df, df_set)
 
-    bill_sum_path: str = product_input["bill_sum_path"]
-    df_bill = read_bill_sum(bill_sum_path)
-    if only_zd_list:
-        df_bill = df_bill[df_bill["A"].isin(only_zd_list)]
-    df_bill_set = set(df_bill["A"].values)
-    if df_set != df_bill_set:
-        zd_difference = df_set.difference(df_bill_set)
-        if zd_difference:
-            messagebox.showwarning(
-                "警告", f"灶点存在于 灶点商品销售一览表，但是不存在于 灶点一览表：{zd_difference}"
+    if global_dict_chk_var["_is_bill_sum_var"].get():
+        bill_sum_path: str = product_input["bill_sum_path"]
+        df_bill = read_bill_sum(bill_sum_path)
+        if only_zd_list:
+            df_bill = df_bill[df_bill["A"].isin(only_zd_list)]
+        df_bill_set = set(df_bill["A"].values)
+        if df_set != df_bill_set:
+            zd_difference = df_set.difference(df_bill_set)
+            if zd_difference:
+                show_Toplevel("灶点存在于 灶点商品销售一览表，但是不存在于 灶点一览表：", "\n".join(zd_difference))
+                return
+            zd_difference = df_bill_set.difference(df_set)
+            if zd_difference:
+                show_Toplevel("灶点存在于 灶点一览表，但是不存在于 灶点商品销售一览表：", "\n".join(zd_difference))
+                return
+        incorrect_zd_set = check_bill(df_bill, df)
+        if incorrect_zd_set:
+            correct_zd_path = os_path.join(
+                output_folder_path, global_config_data["temp_zd"]
             )
-            return
-        zd_difference = df_bill_set.difference(df_set)
-        if zd_difference:
-            messagebox.showwarning(
-                "警告", f"灶点存在于 灶点一览表，但是不存在于 灶点商品销售一览表：{zd_difference}"
-            )
-            return
-    incorrect_zd_set = check_bill(df_bill, df)
-    if incorrect_zd_set:
-        correct_zd_path = os_path.join(
-            output_folder_path, global_config_data["temp_zd"]
-        )
-        if not os_path.isdir(correct_zd_path):
-            makedirs(correct_zd_path)
-        correct_zd_path = os_path.abspath(correct_zd_path)
-        ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
-        ety_bill_check_input.config(state="normal")
-        ety_bill_check_input.delete(0, END)
-        ety_bill_check_input.insert(END, correct_zd_path)
-        ety_bill_check_input.config(state="readonly")
+            if not os_path.isdir(correct_zd_path):
+                makedirs(correct_zd_path)
+            correct_zd_path = os_path.abspath(correct_zd_path)
+            ety_bill_check_input: Entry = global_widgets["ety_bill_check_input"]
+            ety_bill_check_input.config(state="normal")
+            ety_bill_check_input.delete(0, END)
+            ety_bill_check_input.insert(END, correct_zd_path)
+            ety_bill_check_input.config(state="readonly")
 
-        diff_zd = get_diff_zd(correct_zd_path, incorrect_zd_set)
-        if diff_zd:
-            show_incorrect_zd(correct_zd_path, diff_zd)
-            return
-        update_raw_df(correct_zd_path, df, incorrect_zd_set)
+            diff_zd = get_diff_zd(correct_zd_path, incorrect_zd_set)
+            if diff_zd:
+                show_incorrect_zd(correct_zd_path, diff_zd)
+                return
+            update_raw_df(correct_zd_path, df, incorrect_zd_set)
 
     batch_size = current_data["batch_size"]
     zd_set, product_size_dict, ticket_size_dict = get_page_size_list(
@@ -398,7 +380,8 @@ def create_click_raw(only_zd_list: list):
     if zd_set:
         zd_difference = df_set.difference(zd_set)
         if zd_difference:
-            messagebox.showwarning("警告", f"尺寸表缺少灶点号或者遗漏了必要的信息：{zd_difference}")
+            zd_list_str = "\n".join(zd_difference)
+            show_Toplevel("尺寸表缺少灶点号或者遗漏了必要的信息：", zd_list_str)
             return
 
         def remove_unuse(unuse_set: set, size_dict):
@@ -420,38 +403,37 @@ def create_click_raw(only_zd_list: list):
         df_set_raw_product = set(df["E"].values)
         zd_difference = df_set_raw_product.difference(df_set_tax)
         if zd_difference:
-            messagebox.showwarning("警告", f"税率表缺少商品：{zd_difference}")
+            zd_list_str = "\n".join(zd_difference)
+            show_Toplevel("税率表缺少商品：", zd_list_str)
             return
         pass
 
-    t2 = time()
+    if global_dict_chk_var["_is_bill_list_var"].get():
+        write_all_product(
+            df_key_list,
+            df,
+            year,
+            month,
+            suppier,
+            bill_date,
+            current_data,
+            output_folder_path,
+            product_size_dict,
+        )
 
-    write_all_product(
-        df_key_list,
-        df,
-        year,
-        month,
-        suppier,
-        bill_date,
-        current_data,
-        output_folder_path,
-        product_size_dict,
-    )
-    t3 = time()
+        write_all_cover(
+            df_key_list,
+            df,
+            year,
+            month,
+            suppier,
+            current_data,
+            output_folder_path,
+            product_size_dict,
+        )
 
-    write_all_cover(
-        df_key_list,
-        df,
-        year,
-        month,
-        suppier,
-        current_data,
-        output_folder_path,
-        product_size_dict,
-    )
-    t4 = time()
-    make_product_file(product_size_dict, output_folder_path)
-    t5 = time()
+        make_product_file(product_size_dict, output_folder_path)
+
     detail_count_over = []
     if is_import:
         result_import_dict = make_import_file(
@@ -468,20 +450,9 @@ def create_click_raw(only_zd_list: list):
             miss_tax_list = result_import_dict["miss_tax_list"]
             detail_count_over = result_import_dict["detail_count_over"]
             if miss_tax_list:
-                messagebox.showwarning(
-                    "批量导入提示",
-                    f"批量导入失败：以下商品在税率表无法找到，请更新后重新生成，{miss_tax_list}",
-                )
+                show_Toplevel("商品在税率表无法找到，请更新后重新生成：", "\n".join(miss_tax_list))
                 return
 
-    t6 = time()
-    print(
-        get_runtime(t1, t2),
-        get_runtime(t2, t3),
-        get_runtime(t3, t4),
-        get_runtime(t4, t5),
-        get_runtime(t5, t6),
-    )
     cover_source_path = os_path.join(
         output_folder_path, global_config_data["temp_cover"]
     )
@@ -495,10 +466,10 @@ def create_click_raw(only_zd_list: list):
     if detail_count_over:
         ety_detail_max = global_widgets["ety_detail_max"]
         max_detail_count = int(ety_detail_max.get())
-        messagebox.showwarning(
-            "批量导入提示",
-            f"批量导入提示：以下灶点明细超过最大条数({max_detail_count})，请单独导入：{detail_count_over}",
+        show_Toplevel(
+            f"以下灶点明细超过最大条数({max_detail_count}):", "\n".join(detail_count_over)
         )
+
     else:
         result = messagebox.askquestion("提示", "成功，你需要打开文件夹吗？")
         if result == "yes":
@@ -580,14 +551,16 @@ def fr_top_1(fr_product_top):
 
 def fr_top_1_1(fr_product_top):
     fr_0 = Frame(fr_product_top)
-    lbl_bill_sum_input = Label(fr_0, text="灶点一览表:*", fg="red")
+    chk_bill_sum = Checkbutton(
+        fr_0, text="灶点一览表:*", fg="red", variable=global_dict_chk_var["_is_bill_sum_var"]
+    )
     btn1, img1 = render_tooltip(
         fr_0, "asset/question.png", "只会读取excel的第一个sheet！", (15, 15)
     )
     ety_bill_sum_input = Entry(fr_0, width=60)
     btn_bill_sum_input = Button(fr_0, text="选择", command=bill_click)
 
-    lbl_bill_sum_input.grid(row=0, column=0, sticky=E, padx=(56, 0))
+    chk_bill_sum.grid(row=0, column=0, sticky=E, padx=(22, 0))
     btn1.grid(row=0, column=1)
     btn1.image = img1
     ety_bill_sum_input.grid(row=0, column=2, padx=(12, 0))
@@ -614,10 +587,19 @@ def fr_top_1_2(fr_product_top):
     return fr_0
 
 
+def fr_top_1_3(fr_product_top):
+    fr_0 = Frame(fr_product_top)
+    chk_bill_list = Checkbutton(
+        fr_0, text="是否生成商品清单", variable=global_dict_chk_var["_is_bill_list_var"]
+    )
+    chk_bill_list.grid(row=0, column=0)
+    return fr_0
+
+
 def fr_top_2(fr_product_top):
     fr_0 = Frame(fr_product_top)
     chk_import = Checkbutton(
-        fr_0, text="是否批量生成导入列表：", variable=global_dict_chk_var["_import_var"]
+        fr_0, text="是否生成导入列表：", variable=global_dict_chk_var["_import_var"]
     )
     lbl_remark_1 = Label(fr_0, text="(如果不勾选，下面的设置不会生效)")
     chk_import.grid(row=0, column=0)
@@ -628,12 +610,13 @@ def fr_top_2(fr_product_top):
     pass
 
 
-def fr_top_3(fr_product_top):
+def fr_top_3(fr_product_top, row_index):
     fr_0 = Frame(fr_product_top)
 
     def rdo_click_1():
+        fr_batch_index = row_index + 2
         fr_batch_info: Frame = global_widgets["fr_batch_info"]
-        fr_batch_info.grid(row=6, column=0, sticky=W)
+        fr_batch_info.grid(row=fr_batch_index, column=0, sticky=W)
         pass
 
     def rdo_click_2():
@@ -832,11 +815,15 @@ def fr_top(fr_product_top):
     fr_1_2.grid(row=row_index, column=0, sticky=W)
 
     row_index += 1
+    fr_1_3 = fr_top_1_3(fr_product_top)
+    fr_1_3.grid(row=row_index, column=0, sticky=W)
+
+    row_index += 1
     fr_2 = fr_top_2(fr_product_top)
     fr_2.grid(row=row_index, column=0, sticky=W)
 
     row_index += 1
-    fr_3 = fr_top_3(fr_product_top)
+    fr_3 = fr_top_3(fr_product_top, row_index)
     fr_3.grid(row=row_index, column=0, sticky=W)
 
     row_index += 1
@@ -858,10 +845,6 @@ def fr_top(fr_product_top):
     fr_8 = fr_top_8(fr_product_top)
     row_index += 1
     fr_8.grid(row=row_index, column=0, sticky=W)
-
-    # fr_9 = fr_top_9(fr_product_top)
-    # row_index += 1
-    # fr_9.grid(row=row_index, column=0, sticky=W)
 
     btn_product_create = Button(
         fr_product_top, text="生成", width=10, command=create_click

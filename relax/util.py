@@ -36,6 +36,8 @@ global_dict_chk_var = {
     "_active_msg_var": "",
     "_error_msg_var": "",
     "_merge_same_product_var": "",
+    "_is_bill_sum_var": "",
+    "_is_bill_list_var": "",
 }
 
 global_active_obj = {

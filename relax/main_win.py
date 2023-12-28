@@ -6,7 +6,9 @@ from tkinter import (
     X,
     Y,
     BooleanVar,
+    Canvas,
     Frame,
+    Scrollbar,
     StringVar,
     Tk,
     Button,
@@ -107,26 +109,50 @@ def create_folder():
     pass
 
 
+def on_configure(event):
+    canvas: Canvas = global_widgets["canvas"]
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+
 def main_win_start():
     create_folder()
 
     root = Tk()
-    root.title("发票清单-部队 V1.5")
-
+    root.title("发票清单-部队 V1.6")
     center_window(root, 1024, 768)
+
+    canvas = Canvas(root)
+    global_widgets["canvas"] = canvas
+
+    canvas.pack(side="left", fill="both", expand=True)
+
+    scrollbar = Scrollbar(root, command=canvas.yview)
+    scrollbar.pack(side="right", fill="y")
+
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    frm_root = Frame(canvas)
+    canvas.create_window((0, 0), window=frm_root, anchor="nw")
+
+    frm_root.bind("<Configure>", on_configure)
+
     global_widgets["root"] = root
+    global_widgets["canvas"] = canvas
+    global_widgets["frm_root"] = frm_root
     global_dict_chk_var["_import_var"] = BooleanVar()
     global_dict_chk_var["_page_size_var"] = BooleanVar()
     global_dict_chk_var["_stamp_var"] = BooleanVar()
     global_dict_chk_var["_merge_same_product_var"] = BooleanVar()
     global_dict_chk_var["_import_var_option"] = StringVar()
+    global_dict_chk_var["_is_bill_sum_var"] = BooleanVar()
+    global_dict_chk_var["_is_bill_list_var"] = BooleanVar()
 
     init_const()
     global_config_data["is_actived"] = False
     if not init_secret():
         return
 
-    init_view(root)
+    init_view(frm_root)
     init_data()
     init_perm()
     root.mainloop()
