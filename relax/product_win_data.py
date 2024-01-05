@@ -6,33 +6,33 @@ from os import path as os_path, makedirs
 def json_template_input(current_data: dict):
     import_list = current_data["product"]["output"]["import_list"]
     import_list["enable"] = global_dict_chk_var["_import_var"].get()
-    import_list["path"] = global_widgets["ety_import"].get()
-    v = global_dict_chk_var["_import_var_option"].get()
+    import_list["path"] = global_widgets["ety_import"].get().strip()
+    v = global_dict_chk_var["_import_var_option"].get().strip()
     import_list["default_value"] = v
 
     current_import = import_list[v]
     if "sale_name" in current_import:
-        current_import["sale_name"] = global_widgets["ety_sale_name"].get()
-        current_import["sale_account"] = global_widgets["ety_sale_account"].get()
-        current_import["exclude_zd"] = global_widgets["ety_exclude_zd"].get()
+        current_import["sale_name"] = global_widgets["ety_sale_name"].get().strip()
+        current_import["sale_account"] = global_widgets["ety_sale_account"].get().strip()
+        current_import["exclude_zd"] = global_widgets["ety_exclude_zd"].get().strip()
         current_import["is_merge"] = global_dict_chk_var[
             "_merge_same_product_var"
         ].get()
-        header_max = global_widgets["ety_header_max"].get()
-        detail_max = global_widgets["ety_detail_max"].get()
+        header_max = global_widgets["ety_header_max"].get().strip()
+        detail_max = global_widgets["ety_detail_max"].get().strip()
         current_import["header_max"] = int(header_max) if header_max else ""
         current_import["detail_max"] = int(detail_max) if detail_max else ""
 
     product_input = current_data["product"]["input"]
-    product_input["product_path"] = global_widgets["ety_product_input"].get()
+    product_input["product_path"] = global_widgets["ety_product_input"].get().strip()
     product_input["is_bill_sum"] = global_dict_chk_var["_is_bill_sum_var"].get()
-    product_input["bill_sum_path"] = global_widgets["ety_bill_sum_input"].get()
+    product_input["bill_sum_path"] = global_widgets["ety_bill_sum_input"].get().strip()
     product_input["is_bill_list"] = global_dict_chk_var["_is_bill_list_var"].get()
     stamp = product_input["stamp"]
     stamp["enable"] = global_dict_chk_var["_stamp_var"].get()
-    stamp["path"] = global_widgets["ety_stamp"].get()
-    ety_X_stamp_scale_cover = global_widgets["ety_X_stamp_scale_cover"].get()
-    ety_Y_stamp_scale_cover = global_widgets["ety_Y_stamp_scale_cover"].get()
+    stamp["path"] = global_widgets["ety_stamp"].get().strip()
+    ety_X_stamp_scale_cover = global_widgets["ety_X_stamp_scale_cover"].get().strip()
+    ety_Y_stamp_scale_cover = global_widgets["ety_Y_stamp_scale_cover"].get().strip()
     stamp_cover = stamp["cover"]
     stamp_cover["x_scale"] = (
         float(ety_X_stamp_scale_cover) if ety_X_stamp_scale_cover else 0.0
@@ -41,8 +41,8 @@ def json_template_input(current_data: dict):
         float(ety_Y_stamp_scale_cover) if ety_Y_stamp_scale_cover else 0.0
     )
 
-    ety_X_stamp_scale_product = global_widgets["ety_X_stamp_scale_product"].get()
-    ety_Y_stamp_scale_product = global_widgets["ety_Y_stamp_scale_product"].get()
+    ety_X_stamp_scale_product = global_widgets["ety_X_stamp_scale_product"].get().strip()
+    ety_Y_stamp_scale_product = global_widgets["ety_Y_stamp_scale_product"].get().strip()
     stamp_product = stamp["product"]
     stamp_product["x_scale"] = (
         float(ety_X_stamp_scale_product) if ety_X_stamp_scale_product else 0.0
@@ -64,16 +64,16 @@ def json_template_output_cover(current_data: dict):
     cover = current_data["product"]["output"]["cover"]
     cover_column_width = cover["column_width"]
     for i in ["A", "B", "C"]:
-        ety_column_width_cover = global_widgets[f"ety_column_width_cover_{i}"].get()
+        ety_column_width_cover = global_widgets[f"ety_column_width_cover_{i}"].get().strip()
         cover_column_width[i] = (
             float(ety_column_width_cover) if ety_column_width_cover else 0
         )
 
-    ety_row_height_cover_1 = ety_row_height_cover_1.get()
-    ety_row_height_cover_2 = ety_row_height_cover_2.get()
-    ety_row_height_cover_3 = ety_row_height_cover_3.get()
-    ety_row_height_cover_4 = ety_row_height_cover_4.get()
-    ety_row_height_cover_5 = ety_row_height_cover_5.get()
+    ety_row_height_cover_1 = ety_row_height_cover_1.get().strip()
+    ety_row_height_cover_2 = ety_row_height_cover_2.get().strip()
+    ety_row_height_cover_3 = ety_row_height_cover_3.get().strip()
+    ety_row_height_cover_4 = ety_row_height_cover_4.get().strip()
+    ety_row_height_cover_5 = ety_row_height_cover_5.get().strip()
 
     cover["row1"]["height"] = (
         int(ety_row_height_cover_1) if ety_row_height_cover_1 else 0
@@ -106,18 +106,18 @@ def json_template_output_product(current_data: dict):
     product_detail = current_data["product"]["output"]["product_detail"]
     product_column_width = product_detail["column_width"]
     for i in ["A", "B", "C", "D", "E", "C", "F", "G", "H"]:
-        ety_column_width_product = global_widgets[f"ety_column_width_product_{i}"].get()
+        ety_column_width_product = global_widgets[f"ety_column_width_product_{i}"].get().strip()
         product_column_width[i] = (
             float(ety_column_width_product) if ety_column_width_product else 0
         )
-    ety_row_height_product_1 = ety_row_height_product_1.get()
-    ety_row_height_product_2 = ety_row_height_product_2.get()
-    ety_row_height_product_3 = ety_row_height_product_3.get()
-    ety_row_height_product_4 = ety_row_height_product_4.get()
-    ety_row_height_product_5 = ety_row_height_product_5.get()
-    ety_row_height_product_6 = ety_row_height_product_6.get()
-    ety_row_height_product_7 = ety_row_height_product_7.get()
-    ety_row_height_product_8 = ety_row_height_product_8.get()
+    ety_row_height_product_1 = ety_row_height_product_1.get().strip()
+    ety_row_height_product_2 = ety_row_height_product_2.get().strip()
+    ety_row_height_product_3 = ety_row_height_product_3.get().strip()
+    ety_row_height_product_4 = ety_row_height_product_4.get().strip()
+    ety_row_height_product_5 = ety_row_height_product_5.get().strip()
+    ety_row_height_product_6 = ety_row_height_product_6.get().strip()
+    ety_row_height_product_7 = ety_row_height_product_7.get().strip()
+    ety_row_height_product_8 = ety_row_height_product_8.get().strip()
 
     product_detail["row1"]["height"] = (
         int(ety_row_height_product_1) if ety_row_height_product_1 else 0

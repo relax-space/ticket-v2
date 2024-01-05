@@ -177,54 +177,54 @@ def create_click_valid():
     if not lst_menu.curselection():
         messagebox.showwarning("警告", "请先在左边选择一个模板")
         return False
-    elif not ety_supplier_name.get():
+    elif not ety_supplier_name.get().strip():
         messagebox.showwarning("警告", "供应商不能为空！")
         ety_supplier_name.focus_set()
         return False
-    elif not ety_output_path.get():
+    elif not ety_output_path.get().strip():
         messagebox.showwarning("警告", "输出文件夹路径不能为空！")
         ety_output_path.focus_set()
         return False
-    elif not ety_product_input.get():
+    elif not ety_product_input.get().strip():
         messagebox.showwarning("警告", "灶点商品销售一览表不能为空！")
         ety_product_input.focus_set()
         return False
 
     if global_dict_chk_var["_is_bill_sum_var"].get():
-        if not ety_bill_sum_input.get():
+        if not ety_bill_sum_input.get().strip():
             messagebox.showwarning("警告", "灶点一览表不能为空！")
             ety_bill_sum_input.focus_set()
             return False
 
     if global_dict_chk_var["_import_var"].get():
-        if not ety_import.get():
+        if not ety_import.get().strip():
             messagebox.showwarning("警告", "税率表不能为空！")
             ety_import.focus_set()
             return False
-        if global_dict_chk_var["_import_var_option"].get() == "电子税务局（批量）":
+        if global_dict_chk_var["_import_var_option"].get().strip() == "电子税务局（批量）":
             if not global_dict_chk_var["_page_size_var"].get():
                 messagebox.showwarning("警告", "当选择电子税务局（批量）时，必须勾选：是否批量设置页面尺寸！")
                 ety_Y_stamp_scale_product.focus_set()
                 return False
-            elif not ety_sale_name.get():
+            elif not ety_sale_name.get().strip():
                 messagebox.showwarning("警告", "销售方开户行，不能为空！")
                 ety_sale_name.focus_set()
                 return False
-            elif not ety_sale_account.get():
+            elif not ety_sale_account.get().strip():
                 messagebox.showwarning("警告", "销售方银行账号，不能为空！")
                 ety_sale_account.focus_set()
                 return False
-            elif not ety_header_max.get():
+            elif not ety_header_max.get().strip():
                 messagebox.showwarning("警告", "发票最大行数，不能为空！")
                 ety_header_max.focus_set()
                 return False
-            elif not ety_detail_max.get():
+            elif not ety_detail_max.get().strip():
                 messagebox.showwarning("警告", "明细最大行数，不能为空！")
                 ety_detail_max.focus_set()
                 return False
             else:
-                max_header_count = int(ety_header_max.get())
-                max_detail_count = int(ety_detail_max.get())
+                max_header_count = int(ety_header_max.get().strip())
+                max_detail_count = int(ety_detail_max.get().strip())
                 if max_header_count > 100:
                     messagebox.showwarning("警告", "明细最大行数，不能超过100！")
                     ety_detail_max.focus_set()
@@ -235,36 +235,36 @@ def create_click_valid():
                     return False
 
     if global_dict_chk_var["_page_size_var"].get():
-        if not ety_page_size.get():
+        if not ety_page_size.get().strip():
             messagebox.showwarning("警告", "尺寸表不能为空！")
             ety_page_size.focus_set()
             return False
-        elif not ety_A4_page_height.get():
+        elif not ety_A4_page_height.get().strip():
             messagebox.showwarning("警告", "A4不能为空！")
             ety_A4_page_height.focus_set()
             return False
-        elif not ety_A5_page_height.get():
+        elif not ety_A5_page_height.get().strip():
             messagebox.showwarning("警告", "A5不能为空！")
             ety_A5_page_height.focus_set()
             return False
     if global_dict_chk_var["_stamp_var"].get():
-        if not ety_stamp.get():
+        if not ety_stamp.get().strip():
             messagebox.showwarning("警告", "印章路径不能为空！")
             ety_stamp.focus_set()
             return False
-        elif not ety_X_stamp_scale_cover.get():
+        elif not ety_X_stamp_scale_cover.get().strip():
             messagebox.showwarning("警告", "宽度缩放不能为空！")
             ety_X_stamp_scale_cover.focus_set()
             return False
-        elif not ety_Y_stamp_scale_cover.get():
+        elif not ety_Y_stamp_scale_cover.get().strip():
             messagebox.showwarning("警告", "高度缩放不能为空！")
             ety_Y_stamp_scale_cover.focus_set()
             return False
-        elif not ety_X_stamp_scale_product.get():
+        elif not ety_X_stamp_scale_product.get().strip():
             messagebox.showwarning("警告", "宽度缩放不能为空！")
             ety_X_stamp_scale_product.focus_set()
             return False
-        elif not ety_Y_stamp_scale_product.get():
+        elif not ety_Y_stamp_scale_product.get().strip():
             messagebox.showwarning("警告", "高度缩放不能为空！")
             ety_Y_stamp_scale_product.focus_set()
             return False
@@ -313,7 +313,7 @@ def create_click_raw(only_zd_list: list):
             "读取文件异常，请确认以下列名是否存在：订单编号,期望到货时间,灶点编码,供应商名称,商品名称,单价（元）,计量单位,收验货单总金额（元）,数量,小计（元）,报账单编号,报账日期,报账金额（元）",
         )
         return
-    supplier_name = ety_supplier_name.get()
+    supplier_name = ety_supplier_name.get().strip().strip()
     if suppier != supplier_name:
         messagebox.showwarning(
             "警告",
@@ -465,7 +465,7 @@ def create_click_raw(only_zd_list: list):
         rmtree(product_source_path)
     if detail_count_over:
         ety_detail_max = global_widgets["ety_detail_max"]
-        max_detail_count = int(ety_detail_max.get())
+        max_detail_count = int(ety_detail_max.get().strip())
         show_Toplevel(
             f"以下灶点明细超过最大条数({max_detail_count}):", "\n".join(detail_count_over)
         )
@@ -486,7 +486,7 @@ def create_click():
 def single_create():
     try:
         ety_zd_input: Entry = global_widgets["ety_zd_input"]
-        zd_input_str = ety_zd_input.get()
+        zd_input_str = ety_zd_input.get().strip()
         if not zd_input_str:
             messagebox.showwarning("警告", "灶点号不能为空！")
             ety_zd_input.focus_set()

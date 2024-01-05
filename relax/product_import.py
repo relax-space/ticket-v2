@@ -105,7 +105,7 @@ def make_import_file(
     product_title_str = product_title_str.replace("，", ",")
     product_titles = product_title_str.split(",")
 
-    v = global_dict_chk_var["_import_var_option"].get()
+    v = global_dict_chk_var["_import_var_option"].get().strip()
     if v == "诺诺":
         current_import = import_list[v]
         target_path = os_path.join(target_path, v)

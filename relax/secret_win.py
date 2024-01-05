@@ -81,8 +81,8 @@ def is_actived():
 
 
 def save_pwd():
-    code: str = global_widgets["ety_code"].get()
-    pwd: str = global_widgets["ety_pwd"].get()
+    code: str = global_widgets["ety_code"].get().strip()
+    pwd: str = global_widgets["ety_pwd"].get().strip()
 
     if (not pwd) or not pwd.strip():
         global_dict_chk_var["_error_msg_var"].set("激活码不能为空！")

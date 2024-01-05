@@ -5,9 +5,9 @@ from relax.util import global_widgets
 def json_ticket_data(current_data):
     ticket_mapping = current_data["ticket"]["mapping"]
 
-    ticket_mapping["ticket_path"] = global_widgets["ety_ticket_folder"].get()
-    ticket_mapping["mapping_path"] = global_widgets["ety_ticket_mapping"].get()
-    ticket_mapping["exclude_zd"] = global_widgets["ety_exclude_ticket_zd"].get()
+    ticket_mapping["ticket_path"] = global_widgets["ety_ticket_folder"].get().strip()
+    ticket_mapping["mapping_path"] = global_widgets["ety_ticket_mapping"].get().strip()
+    ticket_mapping["exclude_zd"] = global_widgets["ety_exclude_ticket_zd"].get().strip()
     pass
 
 

@@ -32,15 +32,15 @@ def render_top_data(current_data):
 
 
 def json_top_data(current_data):
-    current_data["supplier_name"] = global_widgets["ety_supplier_name"].get()
-    current_data["output_path"] = global_widgets["ety_output_path"].get()
+    current_data["supplier_name"] = global_widgets["ety_supplier_name"].get().strip()
+    current_data["output_path"] = global_widgets["ety_output_path"].get().strip()
 
     batch_size = current_data["batch_size"]
     batch_size["enable"] = global_dict_chk_var["_page_size_var"].get()
-    batch_size["path"] = global_widgets["ety_page_size"].get()
+    batch_size["path"] = global_widgets["ety_page_size"].get().strip()
 
-    ety_A4_page_height = global_widgets["ety_A4_page_height"].get()
-    ety_A5_page_height = global_widgets["ety_A5_page_height"].get()
+    ety_A4_page_height = global_widgets["ety_A4_page_height"].get().strip()
+    ety_A5_page_height = global_widgets["ety_A5_page_height"].get().strip()
     batch_size["page_height_A4"] = int(ety_A4_page_height) if ety_A4_page_height else 0
     batch_size["page_height_A5"] = int(ety_A5_page_height) if ety_A5_page_height else 0
 

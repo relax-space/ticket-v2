@@ -54,7 +54,7 @@ def show_top(tip, default_content, on_event):
         return False
 
     def comfirm(on_event):
-        new_name = ety.get()
+        new_name = ety.get().strip()
         if not new_name:
             messagebox.showinfo("提示", "不能为空")
             return

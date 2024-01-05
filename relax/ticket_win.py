@@ -80,32 +80,32 @@ def create_click_valid():
     if not lst_menu.curselection():
         messagebox.showwarning("警告", "请先在左边选择一个模板")
         return False
-    elif not ety_supplier_name.get():
+    elif not ety_supplier_name.get().strip():
         messagebox.showwarning("警告", "供应商不能为空！")
         ety_supplier_name.focus_set()
         return False
-    elif not ety_output_path.get():
+    elif not ety_output_path.get().strip():
         messagebox.showwarning("警告", "输出文件夹路径不能为空！")
         ety_output_path.focus_set()
         return False
     if global_dict_chk_var["_page_size_var"]:
-        if not ety_page_size.get():
+        if not ety_page_size.get().strip():
             messagebox.showwarning("警告", "尺寸表不能为空！")
             ety_page_size.focus_set()
             return False
-        elif not ety_A4_page_height.get():
+        elif not ety_A4_page_height.get().strip():
             messagebox.showwarning("警告", "A4不能为空！")
             ety_A4_page_height.focus_set()
             return False
-        elif not ety_A5_page_height.get():
+        elif not ety_A5_page_height.get().strip():
             messagebox.showwarning("警告", "A5不能为空！")
             ety_A5_page_height.focus_set()
             return False
-    if not ety_ticket_folder.get():
+    if not ety_ticket_folder.get().strip():
         messagebox.showwarning("警告", "发票文件夹不能为空！")
         ety_ticket_folder.focus_get()
         return False
-    elif not ety_ticket_mapping.get():
+    elif not ety_ticket_mapping.get().strip():
         messagebox.showwarning("警告", "发票映射文件（xlsx）不能为空！")
         ety_ticket_mapping.focus_get()
         return False
@@ -138,12 +138,12 @@ def ticket_create_click_raw(only_zd_list):
     key = lst_menu.get(lst_menu.curselection()[0])
     current_data = get_current_data(key)
     json_data(current_data)
-    ticket_folder_path = ety_ticket_folder.get()
-    ticket_mapping_path = ety_ticket_mapping.get()
+    ticket_folder_path = ety_ticket_folder.get().strip()
+    ticket_mapping_path = ety_ticket_mapping.get().strip()
 
     ticket_data = current_data["ticket"]
     year, month, supplier = read_one_ticket(ticket_mapping_path, ticket_data)
-    supplier_name = ety_supplier_name.get()
+    supplier_name = ety_supplier_name.get().strip()
     if supplier != supplier_name:
         messagebox.showwarning(
             "警告",
@@ -221,7 +221,7 @@ def ticket_create_click():
 def single_create():
     try:
         ety_ticket_zd_input: Entry = global_widgets["ety_ticket_zd_input"]
-        zd_input_str = ety_ticket_zd_input.get()
+        zd_input_str = ety_ticket_zd_input.get().strip()
         if not zd_input_str:
             messagebox.showwarning("警告", "灶点号不能为空！")
             ety_ticket_zd_input.focus_set()
